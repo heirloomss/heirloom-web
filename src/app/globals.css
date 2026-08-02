@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ */
+/* Design tokens as CSS variables (canonical: Heirloom design bible)   */
+/* ------------------------------------------------------------------ */
+:root {
+  --paper: #f8f4ec; /* Museum Paper */
+  --cotton: #fffdfc; /* Cotton White */
+  --ivory: #fffdf8; /* Handmade Ivory */
+  --linen: #ece4d6; /* Warm Linen */
+
+  --moss: #4a6653; /* Forest Moss */
+  --bronze: #a97645; /* Antique Bronze */
+  --gold: #c8a24a; /* Vintage Gold */
+  --burgundy: #7b4252; /* Burgundy Ink */
+  --indigo: #66749c; /* Dusty Indigo */
+
+  --success: #4d8a64;
+  --warning: #c59a45;
+  --error: #a24b48;
+
+  --ink: #2e2a24;
+  --ink-soft: #6b6459;
+  --ink-faint: #9a9184;
+
+  /* Soft paper depth shadows */
+  --shadow-1: 0 2px 6px rgba(0, 0, 0, 0.05);
+  --shadow-2: 0 8px 20px rgba(0, 0, 0, 0.08);
+  --shadow-3: 0 14px 34px rgba(0, 0, 0, 0.1);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans), Satoshi, Inter, system-ui, sans-serif;
+    font-size: 16px; /* accessibility floor */
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display), 'Cormorant Garamond', Georgia, serif;
+    color: var(--ink);
+    font-weight: 600;
+    line-height: 1.12;
+  }
+
+  /* Visible, calm focus states for keyboard users */
+  :focus-visible {
+    outline: 2px solid var(--moss);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: rgba(74, 102, 83, 0.16);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Extremely subtle paper grain — enough to make surfaces feel alive. */
+  .paper-grain::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  }
+
+  /* Faint warm radial — a diorama-like center of light on the page. */
+  .paper-vignette {
+    background-image: radial-gradient(
+      120% 90% at 50% -10%,
+      rgba(255, 253, 252, 0.9) 0%,
+      rgba(248, 244, 236, 0) 55%
+    );
+  }
+
+  /* Hairline paper edge for the "layered archival paper" definition. */
+  .paper-edge {
+    border: 1px solid rgba(46, 42, 36, 0.07);
+    box-shadow: var(--shadow-1);
+  }
+
+  /* Fine rules between quiet sections */
+  .paper-divider {
+    height: 1px;
+    background-image: linear-gradient(
+      to right,
+      transparent,
+      rgba(46, 42, 36, 0.18),
+      transparent
+    );
+  }
+
+  /* Stitched thread — the Family Timeline seam. */
+  .thread-stitch {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(169, 118, 69, 0.7) 0 7px,
+      transparent 7px 15px
+    );
+  }
+  .thread-stitch-horizontal {
+    background-image: repeating-linear-gradient(
+      to right,
+      rgba(169, 118, 69, 0.7) 0 7px,
+      transparent 7px 15px
+    );
+  }
+
+  .mono {
+    font-family: var(--font-mono), 'IBM Plex Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+}
