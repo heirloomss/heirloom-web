@@ -1,22 +1,42 @@
+import React from 'react';
 import { cn } from '@/utils/cn';
 
+interface PaperLayerProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  className?: string;
+  deck?: boolean;
+  dogear?: boolean;
+  tone?: 'cotton' | 'ivory' | 'linen';
+}
+
 /**
- * PaperLayer — a plain server-safe card shell. Layered archival paper:
- * hairline edge, soft shadow, quiet hover lift.
+ * PaperLayer — High-fidelity layered archival paper component.
+ * Features stacked paper physical depth, folded corners, and paper shadows.
  */
 export function PaperLayer({
   children,
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+  deck = false,
+  dogear = false,
+  tone = 'cotton',
+  ...props
+}: PaperLayerProps) {
+  const toneClasses = {
+    cotton: 'bg-[#FFFDFC] border-ink/10',
+    ivory: 'bg-[#FFFDF8] border-moss/15',
+    linen: 'bg-[#ECE4D6] border-bronze/15',
+  };
+
   return (
     <div
       className={cn(
-        'rounded-card border border-ink/[0.07] bg-cotton shadow-paper-1 transition-[box-shadow,transform] duration-500 hover:shadow-paper-2',
-        className,
+        'relative rounded-card transition-all duration-300 shadow-paper-2 hover:shadow-paper-3 hover:-translate-y-1',
+        toneClasses[tone],
+        deck && 'paper-stack-deck',
+        dogear && 'paper-dogear',
+        className
       )}
+      {...props}
     >
       {children}
     </div>

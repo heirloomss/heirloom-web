@@ -25,10 +25,11 @@
   --ink-soft: #6b6459;
   --ink-faint: #9a9184;
 
-  /* Soft paper depth shadows */
-  --shadow-1: 0 2px 6px rgba(0, 0, 0, 0.05);
-  --shadow-2: 0 8px 20px rgba(0, 0, 0, 0.08);
-  --shadow-3: 0 14px 34px rgba(0, 0, 0, 0.1);
+  /* 3D Paper Diorama depth shadows */
+  --shadow-1: 0 3px 8px rgba(46, 42, 36, 0.06);
+  --shadow-2: 0 10px 24px -4px rgba(46, 42, 36, 0.10), 0 2px 6px rgba(46, 42, 36, 0.04);
+  --shadow-3: 0 22px 48px -8px rgba(46, 42, 36, 0.16), 0 4px 12px rgba(46, 42, 36, 0.06);
+  --shadow-diorama: 0 28px 60px -12px rgba(46, 42, 36, 0.22), 0 8px 18px rgba(46, 42, 36, 0.08);
 }
 
 @layer base {
@@ -42,9 +43,10 @@
     background-color: var(--paper);
     color: var(--ink);
     font-family: var(--font-sans), Satoshi, Inter, system-ui, sans-serif;
-    font-size: 16px; /* accessibility floor */
+    font-size: 16px;
     line-height: 1.6;
     min-height: 100vh;
+    overflow-x: hidden;
   }
 
   h1,
@@ -57,7 +59,6 @@
     line-height: 1.12;
   }
 
-  /* Visible, calm focus states for keyboard users */
   :focus-visible {
     outline: 2px solid var(--moss);
     outline-offset: 3px;
@@ -65,74 +66,157 @@
   }
 
   ::selection {
-    background: rgba(74, 102, 83, 0.16);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.001ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.001ms !important;
-    }
+    background: rgba(74, 102, 83, 0.18);
   }
 }
 
 @layer components {
-  /* Extremely subtle paper grain — enough to make surfaces feel alive. */
+  /* Rich 3D tactile paper grain background */
   .paper-grain::before {
     content: '';
     position: fixed;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.5;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    opacity: 0.65;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
   }
 
-  /* Faint warm radial — a diorama-like center of light on the page. */
+  /* Warm radial diorama center stage lighting */
   .paper-vignette {
-    background-image: radial-gradient(
-      120% 90% at 50% -10%,
-      rgba(255, 253, 252, 0.9) 0%,
-      rgba(248, 244, 236, 0) 55%
-    );
+    background-image: 
+      radial-gradient(
+        130% 100% at 50% -10%,
+        rgba(255, 253, 252, 0.95) 0%,
+        rgba(248, 244, 236, 0.4) 60%,
+        rgba(236, 228, 214, 0.3) 100%
+      );
   }
 
-  /* Hairline paper edge for the "layered archival paper" definition. */
+  /* Recessed 3D Shadowbox Paper Diorama Container */
+  .paper-diorama-frame {
+    position: relative;
+    border-radius: 28px;
+    border: 1px solid rgba(46, 42, 36, 0.12);
+    background: linear-gradient(145deg, #FFFDF8 0%, #F7F2E8 100%);
+    box-shadow: 
+      0 20px 50px -10px rgba(46, 42, 36, 0.18),
+      inset 0 2px 4px rgba(255, 255, 255, 0.9),
+      inset 0 -3px 8px rgba(46, 42, 36, 0.05);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .paper-diorama-frame:hover {
+    box-shadow: 
+      0 30px 65px -12px rgba(46, 42, 36, 0.24),
+      inset 0 2px 4px rgba(255, 255, 255, 0.95),
+      inset 0 -3px 8px rgba(46, 42, 36, 0.08);
+  }
+
+  /* 3D Paper Stack Deck (Physical Paper Layers behind elements) */
+  .paper-stack-deck {
+    position: relative;
+  }
+
+  .paper-stack-deck::before {
+    content: '';
+    position: absolute;
+    inset: 4px -6px -6px 4px;
+    background: #ECE4D6;
+    border: 1px solid rgba(46, 42, 36, 0.08);
+    border-radius: inherit;
+    transform: rotate(-1.2deg);
+    z-index: -2;
+    box-shadow: 0 4px 12px rgba(46, 42, 36, 0.08);
+    transition: transform 0.3s ease;
+  }
+
+  .paper-stack-deck::after {
+    content: '';
+    position: absolute;
+    inset: -4px 6px 4px -4px;
+    background: #FFFDFC;
+    border: 1px solid rgba(46, 42, 36, 0.09);
+    border-radius: inherit;
+    transform: rotate(1.2deg);
+    z-index: -1;
+    box-shadow: 0 6px 16px rgba(46, 42, 36, 0.07);
+    transition: transform 0.3s ease;
+  }
+
+  .paper-stack-deck:hover::before {
+    transform: rotate(-2.2deg) translateY(2px);
+  }
+
+  .paper-stack-deck:hover::after {
+    transform: rotate(2.2deg) translateY(-2px);
+  }
+
+  /* Hairline crisp paper edge */
   .paper-edge {
-    border: 1px solid rgba(46, 42, 36, 0.07);
-    box-shadow: var(--shadow-1);
+    border: 1px solid rgba(46, 42, 36, 0.1);
+    box-shadow: var(--shadow-2);
   }
 
-  /* Fine rules between quiet sections */
-  .paper-divider {
-    height: 1px;
-    background-image: linear-gradient(
-      to right,
-      transparent,
-      rgba(46, 42, 36, 0.18),
-      transparent
-    );
+  /* Gold Foil Stamp Shimmer */
+  .gold-foil {
+    background: linear-gradient(135deg, #C8A24A 0%, #EACE85 45%, #B88A2A 70%, #E6C875 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
-  /* Stitched thread — the Family Timeline seam. */
+  .gold-foil-border {
+    border-image: linear-gradient(135deg, #C8A24A, #EACE85, #B88A2A) 1;
+  }
+
+  /* Folded Dog-Ear Paper Corner for Documents */
+  .paper-dogear {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .paper-dogear::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(225deg, #ECE4D6 45%, #FFFDF8 50%, rgba(46, 42, 36, 0.15) 60%);
+    box-shadow: -2px 2px 4px rgba(46, 42, 36, 0.12);
+    border-bottom-left-radius: 4px;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* Stitched thread seam lines */
   .thread-stitch {
     background-image: repeating-linear-gradient(
       to bottom,
-      rgba(169, 118, 69, 0.7) 0 7px,
-      transparent 7px 15px
+      rgba(169, 118, 69, 0.75) 0 8px,
+      transparent 8px 16px
     );
   }
+
   .thread-stitch-horizontal {
     background-image: repeating-linear-gradient(
       to right,
-      rgba(169, 118, 69, 0.7) 0 7px,
-      transparent 7px 15px
+      rgba(169, 118, 69, 0.75) 0 8px,
+      transparent 8px 16px
+    );
+  }
+
+  /* Paper tear / deckle bottom edge pattern */
+  .paper-deckle-bottom {
+    clip-path: polygon(
+      0% 0%, 100% 0%, 100% 95%,
+      97% 98%, 94% 94%, 91% 97%, 88% 95%, 85% 98%, 82% 94%,
+      79% 97%, 76% 95%, 73% 98%, 70% 94%, 67% 97%, 64% 95%,
+      61% 98%, 58% 94%, 55% 97%, 52% 95%, 49% 98%, 46% 94%,
+      43% 97%, 40% 95%, 37% 98%, 34% 94%, 31% 97%, 28% 95%,
+      25% 98%, 22% 94%, 19% 97%, 16% 95%, 13% 98%, 10% 94%,
+      7% 97%, 4% 95%, 0% 98%
     );
   }
 

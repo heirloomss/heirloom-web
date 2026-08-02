@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import { HeirloomLogo } from '@/components/ui/HeirloomLogo';
 
 /** Centered paper-card backdrop for sign in / create account. */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -13,14 +13,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="absolute left-1/2 top-6 h-56 w-[380px] max-w-[74vw] -translate-x-1/2 rotate-1 rounded-card bg-cotton shadow-paper-2 paper-edge" />
       </div>
 
-      <Link href="/" className="relative z-10 mb-8 flex items-center gap-3">
-        <span
-          aria-hidden
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-moss/30 bg-ivory shadow-paper-1"
-        >
-          <Image src="/heirloom-mark.svg" alt="" width={22} height={22} unoptimized className="h-6 w-6" />
-        </span>
-        <span className="font-display text-2xl font-semibold tracking-wide">Heirloom</span>
+      <Link href="/" className="relative z-10 mb-8 flex items-center gap-3.5">
+        <HeirloomLogo size={44} className="shadow-paper-2 rounded-xl" />
+        <div className="flex flex-col">
+          <span className="font-display text-2xl font-bold tracking-wide text-ink">Heirloom</span>
+          <span className="text-[9px] font-bold tracking-widest text-bronze uppercase">Digital Legacy</span>
+        </div>
       </Link>
 
       <div className="relative z-10 w-full max-w-md rounded-dialog bg-cotton p-8 shadow-paper-3 paper-edge sm:p-10">

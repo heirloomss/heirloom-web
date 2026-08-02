@@ -35,6 +35,10 @@ export const metadata: Metadata = {
   },
   description:
     'Heirloom is a digital legacy platform. Preserve what matters. Protect those who matter — beneficiaries, documents, memories, and the certainty that love deserves a plan that lasts.',
+  icons: {
+    icon: '/heirloom-logo.svg',
+    apple: '/heirloom-logo.svg',
+  },
 };
 
 export const viewport: Viewport = {

@@ -6,15 +6,18 @@ import {
   HeartHandshake,
   Mail,
   Shield,
+  KeyRound,
+  CheckCircle2,
+  Lock,
   type LucideIcon,
 } from 'lucide-react';
 
-/** Static marketing copy & palette mappings. Keeps pages free of copy clutter. */
+/** Clear marketing copy & palette mappings. Keeps landing page copy completely explanatory. */
 
 export const TAGLINES = [
-  'Because love deserves a plan that lasts.',
-  'Preserve what matters. Protect those who matter.',
-  'Your legacy, thoughtfully prepared.',
+  'Because your family deserves certainty, clarity, and peace of mind.',
+  'Preserve your assets. Protect your family. Share your memories.',
+  'Your digital legacy, secured with precision and delivered with care.',
 ] as const;
 
 export type CardTone = 'moss' | 'burgundy' | 'indigo' | 'bronze';
@@ -29,6 +32,7 @@ export const TONE_STYLES: Record<CardTone, { wash: string; text: string }> = {
 
 export interface Feature {
   title: string;
+  subtitle: string;
   description: string;
   icon: LucideIcon;
   tone: CardTone;
@@ -36,44 +40,50 @@ export interface Feature {
 
 export const FEATURES: Feature[] = [
   {
-    title: 'Beneficiaries',
+    title: 'Smart Asset Allocation',
+    subtitle: 'Stellar Smart Contracts',
     description:
-      'The people and causes you love, gathered in one place — with clear, gentle instructions about who receives what.',
+      'Set exact percentage splits (e.g. 50% daughter, 30% son) for digital assets & funds. Handled automatically on Stellar with zero complex crypto steps for beneficiaries.',
     icon: HeartHandshake,
     tone: 'moss',
   },
   {
-    title: 'Digital Archive',
+    title: 'Encrypted Document Vault',
+    subtitle: 'AES-256 Client Encryption',
     description:
-      'Deeds, passports, insurance — every important document, sealed safely and released only when the time comes.',
+      'Store property deeds, passports, tax records, and legal wills. Files are encrypted on your device before upload, so only your named beneficiaries can decrypt them.',
     icon: FileText,
     tone: 'indigo',
   },
   {
-    title: 'Messages',
+    title: 'Time-Released Messages',
+    subtitle: 'Letters & Milestone Videos',
     description:
-      'Letters, voice notes, videos and photographs — words of love and guidance, delivered at exactly the right moment.',
+      'Leave personal written letters, voice notes, and video messages. Schedule them to be delivered immediately, after 30 days, or on future milestones like an 18th birthday.',
     icon: Mail,
     tone: 'burgundy',
   },
   {
-    title: 'Legacy Journey',
+    title: 'Visual Legacy Timeline',
+    subtitle: 'Complete Roadmap',
     description:
-      'A timeline of everything you leave behind, delivered gracefully — some things immediately, others at future milestones.',
+      'A clear, step-by-step visual timeline of every document, asset, and message prepared, showing exact delivery conditions and status.',
     icon: Clock,
     tone: 'bronze',
   },
   {
-    title: 'Guardians',
+    title: 'Trusted Guardian Network',
+    subtitle: 'Human Safeguard Protocol',
     description:
-      'A small circle of people you trust absolutely, who confirm everything and help protect your family.',
+      'Nominate 2-3 trusted individuals (such as a sibling or lawyer). A configurable threshold (e.g. 2 of 3) must confirm status before any plan executes.',
     icon: Shield,
     tone: 'moss',
   },
   {
-    title: 'Peace of Mind',
+    title: 'Gentle Life Check-In',
+    subtitle: '1-Click Confirmation',
     description:
-      'A gentle Life Check-In keeps everything quiet and certain. As long as you are here, nothing changes.',
+      'Receive periodic (30, 90, or 180 day) email check-ins. Clicking "I\'m Here" resets the timer and keeps everything completely private and active.',
     icon: Award,
     tone: 'bronze',
   },
@@ -88,40 +98,59 @@ export interface JourneyStep {
 
 export const JOURNEY_STEPS: JourneyStep[] = [
   {
-    moment: 'Immediately',
-    label: 'Essential documents',
-    detail: 'The will, insurance and key records — available to the right people at once.',
+    moment: 'Step 1: Immediately',
+    label: 'Essential Legal Documents',
+    detail: 'Wills, life insurance policies, and critical house deeds released immediately to designated beneficiaries upon verified trigger.',
     icon: FileText,
   },
   {
-    moment: 'After 30 days',
-    label: 'Letters & savings',
-    detail: 'A window of quiet, then your words and provisions are delivered gently.',
+    moment: 'Step 2: 30 Days Later',
+    label: 'Financial Assets & Accounts',
+    detail: 'Digital funds (USDC/XLM) transferred securely via Stellar claimable balances, and account password access hints shared.',
     icon: Clock,
   },
   {
-    moment: 'Age 18',
-    label: 'Coming of age',
-    detail: 'What you saved for your children, released when they are grown.',
+    moment: 'Step 3: Age 18',
+    label: 'Child Trust & Savings',
+    detail: 'Savings and specific legacy funds saved for your children are released automatically when they reach adulthood.',
     icon: Cake,
   },
   {
-    moment: 'Future milestones',
-    label: 'Weddings & beyond',
-    detail: 'Moments you choose — marked and kept safe for the day they arrive.',
+    moment: 'Step 4: Future Milestones',
+    label: 'Personal Letters & Videos',
+    detail: 'Handwritten notes, wisdom letters, and videos saved for future milestones (like weddings or graduations) delivered as scheduled.',
     icon: Award,
   },
 ];
 
 export const FEATURE_AUDIENCE = [
-  'Parents who want certainty for their children, whatever tomorrow holds.',
-  'Couples building a life together and protecting it — quietly, simply.',
-  'Caretakers of family history, keeping memories from slipping away.',
-  'Anyone who has ever thought: "Someone should know where everything is."',
+  'Parents who want to guarantee their children inherit savings, property deeds, and loving messages automatically.',
+  'Digital Asset & Crypto Holders looking for a simple, non-technical way to pass on funds without risking lost private keys.',
+  'Caretakers & Family Leaders organizing important documents (insurance, wills, titles) so relatives never struggle to find them.',
+  'Anyone who wants peace of mind knowing their family will be guided, protected, and provided for no matter what happens.',
 ];
 
 export const LEGACY_JOURNEY = {
-  title: 'The Legacy Journey',
+  title: 'Automated Release Timeline',
   subtitle:
-    'An ordered, gentle timeline of everything you leave behind — delivered at exactly the right moment.',
+    'An ordered, gentle schedule of how assets, documents, and personal notes are delivered at the precise right moment.',
 } as const;
+
+export const FAQS = [
+  {
+    question: 'What is Heirloom and how does it work?',
+    answer: 'Heirloom is a digital legacy platform that combines client-side document encryption and Stellar smart contracts. You upload important documents, set fund allocation percentages, write letters, and pick 2-3 trusted guardians. If you miss your periodic check-ins and guardians confirm your status, your inheritance plan executes automatically.'
+  },
+  {
+    question: 'What happens if I accidentally miss a Life Check-In?',
+    answer: 'Missing a check-in NEVER immediately triggers your inheritance plan. You will receive multiple email and SMS reminders. If you remain unresponsive, your nominated Trusted Guardians must vote and confirm (e.g. 2 out of 3 confirmation threshold) before any release process begins.'
+  },
+  {
+    question: 'Do my beneficiaries need crypto knowledge to receive assets?',
+    answer: 'No. Heirloom abstracts away all blockchain jargon. Beneficiaries receive clear, guided instructions with direct claim links that convert or deposit funds smoothly into standard fiat bank balances or simple digital wallets.'
+  },
+  {
+    question: 'Are my private documents and messages safe?',
+    answer: 'Yes. All documents and messages are encrypted on your local browser using zero-knowledge encryption before reaching our servers. Heirloom cannot read your files — only your intended beneficiaries holding the decryption key can unlock them.'
+  }
+];

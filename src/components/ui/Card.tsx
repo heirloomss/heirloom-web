@@ -1,16 +1,30 @@
+import React from 'react';
 import { cn } from '@/utils/cn';
 
-/** Semantic card primitives built on the paper surface. */
+interface CardProps extends React.HTMLAttributes<HTMLElement> {
+  children: React.ReactNode;
+  className?: string;
+  deck?: boolean;
+  dogear?: boolean;
+}
 
 export function Card({
   children,
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+  deck = false,
+  dogear = false,
+  ...props
+}: CardProps) {
   return (
-    <article className={cn('rounded-card bg-cotton p-6 paper-edge sm:p-7', className)}>
+    <article
+      className={cn(
+        'rounded-card bg-cotton p-6 paper-edge transition-all duration-300 shadow-paper-2 hover:shadow-paper-3 hover:-translate-y-0.5 sm:p-7',
+        deck && 'paper-stack-deck',
+        dogear && 'paper-dogear',
+        className
+      )}
+      {...props}
+    >
       {children}
     </article>
   );
@@ -35,7 +49,7 @@ export function CardTitle({
   className?: string;
   as?: 'h2' | 'h3' | 'h4';
 }) {
-  return <Tag className={cn('font-display text-2xl', className)}>{children}</Tag>;
+  return <Tag className={cn('font-display text-2xl font-semibold text-ink', className)}>{children}</Tag>;
 }
 
 export function CardDescription({
