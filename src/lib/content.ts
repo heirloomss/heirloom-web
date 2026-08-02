@@ -6,16 +6,13 @@ import {
   HeartHandshake,
   Mail,
   Shield,
-  KeyRound,
-  CheckCircle2,
-  Lock,
   type LucideIcon,
 } from 'lucide-react';
 
 /** Clear marketing copy & palette mappings. Keeps landing page copy completely explanatory. */
 
 export const TAGLINES = [
-  'Because your family deserves certainty, clarity, and peace of mind.',
+  'Protecting your family, securing your assets, and preserving your memories with complete clarity.',
   'Preserve your assets. Protect your family. Share your memories.',
   'Your digital legacy, secured with precision and delivered with care.',
 ] as const;
@@ -127,7 +124,7 @@ export const FEATURE_AUDIENCE = [
   'Parents who want to guarantee their children inherit savings, property deeds, and loving messages automatically.',
   'Digital Asset & Crypto Holders looking for a simple, non-technical way to pass on funds without risking lost private keys.',
   'Caretakers & Family Leaders organizing important documents (insurance, wills, titles) so relatives never struggle to find them.',
-  'Anyone who wants peace of mind knowing their family will be guided, protected, and provided for no matter what happens.',
+  'Anyone who wants complete certainty that their family will be guided, protected, and provided for no matter what happens.',
 ];
 
 export const LEGACY_JOURNEY = {

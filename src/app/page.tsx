@@ -2,13 +2,7 @@ import Link from 'next/link';
 import { 
   ArrowRight, 
   Lock, 
-  Shield, 
   CheckCircle2, 
-  FileText, 
-  HeartHandshake, 
-  Mail, 
-  Clock, 
-  HelpCircle,
   Sparkles
 } from 'lucide-react';
 import { PaperLayer } from '@/components/ui/PaperLayer';
@@ -49,259 +43,232 @@ export default function LandingPage() {
                 href="/login"
                 className="text-sm font-medium text-ink-soft transition-colors hover:text-ink"
               >
-                Sign in
+                Sign In
               </Link>
             </li>
             <li>
               <Link
                 href="/register"
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-button bg-moss px-6 text-sm font-semibold text-cotton shadow-paper-2 transition-all duration-300 hover:-translate-y-0.5 hover:bg-moss-deep"
+                className="inline-flex h-10 items-center justify-center rounded-button bg-moss px-5 text-sm font-semibold text-cotton shadow-paper-2 transition-transform duration-200 hover:-translate-y-0.5"
               >
-                <span>Begin your legacy</span>
-                <ArrowRight className="h-4 w-4" />
+                Get Started
               </Link>
             </li>
           </ul>
         </nav>
       </header>
 
-      {/* Hero Section - 3D Paper Diorama Theme */}
-      <section aria-labelledby="hero-heading" className="relative z-10 pb-16 pt-12 text-center md:pt-16">
-        <div className="mx-auto max-w-4xl space-y-6">
-          <Badge tone="gold" className="mx-auto inline-flex items-center gap-2 px-4 py-1.5 text-xs font-bold tracking-wide uppercase shadow-paper-2 border border-gold/40">
-            <Shield className="h-4 w-4 text-bronze" aria-hidden />
-            <span>Digital Legacy & Asset Inheritance Platform</span>
-          </Badge>
+      {/* Hero section */}
+      <section className="relative z-10 py-16 md:py-24 text-center">
+        <div className="mx-auto max-w-3xl space-y-6">
+          <div className="inline-flex items-center gap-2 rounded-full border border-bronze/30 bg-ivory px-4 py-1.5 shadow-paper-1">
+            <Sparkles className="h-4 w-4 text-bronze" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-bronze">
+              Zero-Knowledge Legacy Planning
+            </span>
+          </div>
 
-          <h1
-            id="hero-heading"
-            className="mx-auto max-w-4xl text-balance font-display text-4xl font-semibold leading-[1.1] text-ink sm:text-6xl md:text-7xl"
-          >
-            Protect Your Assets, Documents & Memories <br className="hidden sm:inline" />
-            <span className="italic text-moss font-normal">For the People You Love</span>
+          <h1 className="font-display text-4xl font-bold text-ink sm:text-5xl md:text-6xl lg:text-7xl leading-[1.15]">
+            Protect Your Assets, Documents & Memories For the People You Love
           </h1>
 
-          <p className="mx-auto max-w-2xl text-balance text-base leading-relaxed text-ink-soft sm:text-lg md:text-xl">
-            Heirloom lets you securely store encrypted property deeds and wills, automatically distribute financial funds using smart contracts, and schedule time-released personal letters — delivered automatically when needed.
+          <p className="mx-auto max-w-2xl text-lg text-ink-soft md:text-xl leading-relaxed">
+            Heirloom securely stores your property deeds, tax records, and private letters, 
+            and automatically releases funds to your beneficiaries via Stellar smart contracts when triggered.
           </p>
 
-          <div className="pt-2 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
             <Link
               href="/register"
-              className="inline-flex min-h-[54px] w-full sm:w-auto items-center justify-center gap-2 rounded-button bg-moss px-9 text-base font-semibold text-cotton shadow-paper-3 transition-all duration-300 hover:-translate-y-0.5 hover:bg-moss-deep"
+              className="inline-flex min-h-[52px] items-center gap-2 rounded-button bg-moss px-8 text-base font-bold text-cotton shadow-paper-3 transition-all duration-300 hover:-translate-y-0.5 hover:bg-moss-deep"
             >
-              <span>Begin your legacy</span>
+              <span>Create Your Vault</span>
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
-            <a
-              href="#how-it-works"
-              className="inline-flex min-h-[54px] w-full sm:w-auto items-center justify-center rounded-button border border-ink/15 bg-cotton/90 px-8 text-base font-semibold text-ink transition-all hover:border-ink/30 hover:bg-cotton shadow-paper-1"
+            <Link
+              href="/login"
+              className="inline-flex min-h-[52px] items-center gap-2 rounded-button border border-ink/15 bg-ivory px-7 text-base font-semibold text-ink shadow-paper-1 transition-all duration-300 hover:bg-linen"
             >
-              See how it works
-            </a>
+              <Lock className="h-4 w-4 text-moss" aria-hidden />
+              <span>Explore Demo Vault</span>
+            </Link>
+          </div>
+
+          {/* Trust points */}
+          <div className="flex flex-wrap items-center justify-center gap-6 pt-6 text-xs font-medium text-ink-soft">
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-moss" /> Client-Side Encryption
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-moss" /> 2-of-3 Guardian Verification
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-moss" /> Automated Stellar Distribution
+            </span>
           </div>
         </div>
 
-        {/* Dynamic 3D Paper Diorama Showcase Deck */}
+        {/* Hero Card Deck Preview Component */}
         <HeroCardDeck />
       </section>
 
-      {/* 3-Step Process Cards with Paper Stack Deck */}
-      <section className="relative z-10 py-12 border-y border-ink/10 my-8">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-bronze">
-            3-Step Physical Inheritance Workflow
-          </p>
-          <h2 className="mt-2 font-display text-3xl md:text-4xl text-ink font-semibold">
-            How Heirloom Protects Your Digital Legacy
+      {/* How Heirloom Works (3 Step Process) */}
+      <section className="py-16 border-t border-ink/10">
+        <div className="text-center mb-12">
+          <Badge tone="moss">Simple 3-Step Process</Badge>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-ink mt-3">
+            How Your Digital Legacy Is Protected & Delivered
           </h2>
-          <p className="mt-2 text-sm text-ink-soft">
-            Set up once in under 10 minutes. Your loved ones get total certainty when it matters most.
+          <p className="text-ink-soft text-base mt-2 max-w-xl mx-auto">
+            Everything is configured in under 10 minutes, operating automatically without requiring manual intervention from your family.
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3">
-          <div className="paper-stack-deck rounded-card bg-ivory p-7 shadow-paper-2 border border-moss/20 paper-edge relative space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-moss-wash text-moss font-display text-xl font-bold">
-                1
-              </div>
-              <WaxSeal tone="moss" size="sm" text="I" />
-            </div>
-            <h3 className="font-display text-2xl font-semibold text-ink">Build Your Vault</h3>
-            <p className="text-sm leading-relaxed text-ink-soft">
-              Upload encrypted property deeds, passports, life insurance, and wills. Record audio or video messages for family milestones.
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="paper-diorama-frame paper-stack-deck p-8 flex flex-col items-start gap-4">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-moss-wash text-moss font-bold font-mono text-lg">
+              01
+            </span>
+            <h3 className="font-display text-2xl font-bold text-ink">1. Build Your Vault</h3>
+            <p className="text-sm text-ink-soft leading-relaxed">
+              Upload critical documents (wills, deeds, insurance) and write personal letters or milestone videos. All files are encrypted on your local device with AES-256 before storage.
             </p>
           </div>
 
-          <div className="paper-stack-deck rounded-card bg-ivory p-7 shadow-paper-2 border border-indigo/20 paper-edge relative space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-wash text-indigo font-display text-xl font-bold">
-                2
-              </div>
-              <WaxSeal tone="gold" size="sm" text="II" />
-            </div>
-            <h3 className="font-display text-2xl font-semibold text-ink">Set Beneficiaries & Rules</h3>
-            <p className="text-sm leading-relaxed text-ink-soft">
-              Assign exact percentage splits for funds (USDC/XLM) and appoint 2–3 trusted guardians (family member or lawyer) to verify status.
+          <div className="paper-diorama-frame paper-stack-deck p-8 flex flex-col items-start gap-4">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-burgundy-wash text-burgundy font-bold font-mono text-lg">
+              02
+            </span>
+            <h3 className="font-display text-2xl font-bold text-ink">2. Set Rules & Guardians</h3>
+            <p className="text-sm text-ink-soft leading-relaxed">
+              Designate percentage asset splits for your beneficiaries on Stellar, and select 2-3 trusted guardians (relatives or lawyers) who will verify your status if you ever miss a check-in.
             </p>
           </div>
 
-          <div className="paper-stack-deck rounded-card bg-ivory p-7 shadow-paper-2 border border-burgundy/20 paper-edge relative space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-burgundy-wash text-burgundy font-display text-xl font-bold">
-                3
-              </div>
-              <WaxSeal tone="burgundy" size="sm" text="III" />
-            </div>
-            <h3 className="font-display text-2xl font-semibold text-ink">Automated Safe Release</h3>
-            <p className="text-sm leading-relaxed text-ink-soft">
-              Monthly 1-click &quot;I&apos;m Here&quot; check-ins keep items private. If missed and confirmed by guardians, your plan executes seamlessly.
+          <div className="paper-diorama-frame paper-stack-deck p-8 flex flex-col items-start gap-4">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-bronze-wash text-bronze font-bold font-mono text-lg">
+              03
+            </span>
+            <h3 className="font-display text-2xl font-bold text-ink">3. Automated Safe Release</h3>
+            <p className="text-sm text-ink-soft leading-relaxed">
+              Periodic email check-ins ensure you are active. If an unverified period occurs, guardians confirm your status and Stellar smart contracts seamlessly transfer assets to your beneficiaries.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="how-it-works" aria-labelledby="features-heading" className="relative z-10 py-12">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-bronze">
-            Complete Platform Capabilities
-          </p>
-          <h2 id="features-heading" className="mt-2 font-display text-4xl md:text-5xl font-semibold">
-            Everything Needed to Safeguard Your Legacy
+      {/* Feature Grid */}
+      <section className="py-16 border-t border-ink/10">
+        <div className="text-center mb-12">
+          <Badge tone="bronze">Built For Security & Longevity</Badge>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-ink mt-3">
+            Every Layer Engineered For Certainty
           </h2>
-          <p className="mt-3 text-ink-soft text-base">
-            Designed for human warmth, absolute security, and clear execution.
-          </p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((feature) => (
-            <FeatureCard key={feature.title} feature={feature} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {FEATURES.map((feature, idx) => (
+            <FeatureCard key={idx} feature={feature} />
           ))}
         </div>
       </section>
 
-      {/* Legacy Journey Timeline Section with Stitched Needle Lines */}
-      <section aria-labelledby="journey-heading" className="py-16">
-        <div className="paper-diorama-frame px-6 py-14 md:px-16">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-bronze">
-              {LEGACY_JOURNEY.title}
-            </p>
-            <h2 id="journey-heading" className="mt-2 font-display text-4xl md:text-5xl font-semibold">
-              Delivered at Exactly the Right Moment
-            </h2>
-            <p className="mt-4 text-ink-soft">
-              {LEGACY_JOURNEY.subtitle}
-            </p>
-          </div>
-
-          <div className="relative mt-14">
-            <div
-              aria-hidden
-              className="thread-stitch-horizontal absolute left-4 right-4 top-6 hidden h-1 md:block"
-            />
-            <ol className="grid gap-6 md:grid-cols-4">
-              {JOURNEY_STEPS.map((step) => (
-                <li key={step.moment} className="relative">
-                  <div className="flex flex-col items-start md:items-center md:text-center">
-                    <span
-                      className="z-10 flex h-14 w-14 items-center justify-center rounded-full border-4 border-linen bg-ivory shadow-paper-2"
-                      aria-hidden
-                    >
-                      <step.icon className="h-6 w-6 text-bronze" />
-                    </span>
-                    <div className="paper-stack-deck mt-4 rounded-card bg-ivory p-5 paper-edge w-full border border-ink/10">
-                      <p className="text-xs font-bold uppercase tracking-[0.2em] text-moss">
-                        {step.moment}
-                      </p>
-                      <h3 className="mt-1 font-display text-xl font-semibold text-ink">{step.label}</h3>
-                      <p className="mt-2 text-xs leading-relaxed text-ink-soft">
-                        {step.detail}
-                      </p>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      </section>
-
-      {/* Target Audience Section */}
-      <section aria-labelledby="audience-heading" className="py-12">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-bronze">
-            Designed for You
-          </p>
-          <h2 id="audience-heading" className="mt-2 font-display text-4xl font-semibold">
-            Built for Thoughtful Families & Asset Holders
+      {/* Legacy Journey Timeline Section */}
+      <section className="py-16 border-t border-ink/10">
+        <div className="text-center mb-12">
+          <Badge tone="burgundy">{LEGACY_JOURNEY.title}</Badge>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-ink mt-3">
+            Delivered At The Right Moment
           </h2>
-          <ul className="mt-8 grid gap-4 text-left sm:grid-cols-2">
-            {FEATURE_AUDIENCE.map((item) => (
-              <li
-                key={item}
-                className="paper-stack-deck flex items-start gap-3.5 rounded-card bg-cotton p-5 shadow-paper-2 border border-ink/10"
-              >
-                <CheckCircle2 className="mt-0.5 h-5 w-5 text-moss shrink-0" />
-                <span className="text-sm text-ink-soft leading-relaxed">{item}</span>
-              </li>
-            ))}
-          </ul>
+          <p className="text-ink-soft text-base mt-2 max-w-xl mx-auto">
+            {LEGACY_JOURNEY.subtitle}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {JOURNEY_STEPS.map((step, idx) => (
+            <div key={idx} className="paper-diorama-frame paper-stack-deck p-7 flex items-start gap-5">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-ivory shadow-paper-1 border border-ink/10 text-moss">
+                <step.icon className="h-6 w-6" strokeWidth={1.8} />
+              </span>
+              <div className="space-y-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-bronze">{step.moment}</span>
+                <h3 className="font-display text-xl font-bold text-ink">{step.label}</h3>
+                <p className="text-sm text-ink-soft leading-relaxed">{step.detail}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Frequently Asked Questions with Dog-Ear Paper Cards */}
-      <section className="py-12 border-t border-ink/10">
-        <div className="mx-auto max-w-3xl">
-          <div className="text-center mb-10">
-            <Badge tone="gold" className="mx-auto mb-3 border border-gold/40">
-              <HelpCircle className="mr-1.5 h-3.5 w-3.5" aria-hidden />
-              Clear Answers
-            </Badge>
-            <h2 className="font-display text-3xl md:text-4xl text-ink font-semibold">
-              Frequently Asked Questions
+      {/* Who Heirloom Is For */}
+      <section className="py-16 border-t border-ink/10">
+        <div className="paper-diorama-frame p-8 md:p-12">
+          <div className="max-w-2xl">
+            <Badge tone="moss">Who Uses Heirloom</Badge>
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-ink mt-3">
+              Designed For Anyone Who Wants Certainty
             </h2>
+            <p className="text-ink-soft text-base mt-2">
+              Whether managing family estates, tokenized savings, or personal memories, Heirloom ensures your loved ones are never left in the dark.
+            </p>
           </div>
 
-          <div className="space-y-4">
-            {FAQS.map((faq, idx) => (
-              <div key={idx} className="paper-dogear paper-stack-deck rounded-card bg-ivory p-6 shadow-paper-2 border border-ink/10">
-                <h3 className="font-display text-xl font-semibold text-ink flex items-center gap-2">
-                  <span className="text-moss font-mono text-sm font-bold">0{idx + 1}.</span>
-                  {faq.question}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink-soft pl-6">
-                  {faq.answer}
-                </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+            {FEATURE_AUDIENCE.map((aud, idx) => (
+              <div key={idx} className="flex items-start gap-3 p-4 rounded-card bg-ivory border border-ink/10 shadow-paper-1">
+                <CheckCircle2 className="h-5 w-5 text-moss shrink-0 mt-0.5" />
+                <span className="text-sm font-medium text-ink leading-relaxed">{aud}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Closing CTA with Dark Paper Diorama & Wax Seal Backdrop */}
-      <section className="paper-diorama-frame-dark mt-12 px-6 py-16 text-center text-cotton shadow-diorama md:px-16 relative overflow-hidden">
-        <div className="relative z-10 space-y-4">
+      {/* Frequently Asked Questions */}
+      <section className="py-16 border-t border-ink/10">
+        <div className="text-center mb-12">
+          <Badge tone="moss">Clear Answers</Badge>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-ink mt-3">
+            Frequently Asked Questions
+          </h2>
+        </div>
+
+        <div className="max-w-3xl mx-auto space-y-4">
+          {FAQS.map((faq, idx) => (
+            <div key={idx} className="paper-dogear paper-stack-deck rounded-card bg-ivory p-6 shadow-paper-2 border border-ink/10">
+              <h3 className="font-display text-xl font-semibold text-ink flex items-center gap-2">
+                <span className="text-moss font-mono text-sm font-bold">0{idx + 1}.</span>
+                {faq.question}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-soft pl-6">
+                {faq.answer}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Closing CTA with Primary Paper Diorama Frame & Gold Wax Seal */}
+      <section className="paper-diorama-frame mt-12 px-6 py-16 text-center text-ink shadow-diorama md:px-16 relative overflow-hidden bg-ivory border border-ink/15">
+        <div className="relative z-10 space-y-5">
           <WaxSeal tone="gold" size="lg" className="mx-auto mb-2" />
-          <h2 className="mx-auto max-w-2xl font-display text-4xl text-cotton md:text-5xl font-semibold leading-tight">
+          <h2 className="mx-auto max-w-2xl font-display text-4xl text-ink md:text-5xl font-bold leading-tight">
             Prepare Your Digital Legacy Today
           </h2>
-          <p className="mx-auto max-w-xl text-cotton/90 text-base leading-relaxed">
-            Takes less than 10 minutes to setup. Give your family peace of mind, protected documents, and clear financial inheritance.
+          <p className="mx-auto max-w-xl text-ink-soft text-base leading-relaxed">
+            Takes less than 10 minutes to setup. Safeguard your family&apos;s financial inheritance, encrypted property deeds, and personal letters.
           </p>
           <div className="pt-2">
             <Link
               href="/register"
-              className="inline-flex min-h-[54px] items-center gap-2 rounded-button bg-cotton px-9 text-base font-bold text-moss-deep shadow-paper-3 transition-transform duration-300 hover:-translate-y-0.5 hover:bg-white"
+              className="inline-flex min-h-[54px] items-center gap-2 rounded-button bg-moss px-9 text-base font-bold text-cotton shadow-paper-3 transition-transform duration-300 hover:-translate-y-0.5 hover:bg-moss-deep"
             >
               <Lock className="h-4 w-4" aria-hidden />
               <span>Begin your legacy now</span>
             </Link>
           </div>
-          <p className="pt-4 font-display text-lg italic text-cotton/90">
+          <p className="pt-4 font-display text-lg italic text-bronze">
             {TAGLINES[0]}
           </p>
         </div>

@@ -10,8 +10,6 @@ import {
   Clock, 
   Lock, 
   CheckCircle2, 
-  Sparkles,
-  PlayCircle,
   Eye,
   KeyRound,
   UserCheck
@@ -58,9 +56,9 @@ export function HeroCardDeck() {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Ambient background glow & stacked background diorama paper sheets */}
-      <div className="absolute -top-12 left-1/2 -z-20 h-80 w-[95%] -translate-x-1/2 rounded-[36px] bg-linen/70 rotate-[-1deg] shadow-paper-2 border border-bronze/10" />
-      <div className="absolute -top-6 left-1/2 -z-10 h-80 w-[92%] -translate-x-[49%] rounded-[32px] bg-cotton rotate-[1deg] shadow-paper-3 border border-moss/10" />
+      {/* Centered & structured background paper layers */}
+      <div className="absolute -top-4 left-1/2 -z-20 h-[90%] w-[98%] -translate-x-1/2 rounded-[32px] bg-linen/80 shadow-paper-2 border border-bronze/10" />
+      <div className="absolute -top-2 left-1/2 -z-10 h-[95%] w-[99%] -translate-x-1/2 rounded-[28px] bg-cotton shadow-paper-2 border border-moss/10" />
 
       {/* Tab navigation bar */}
       <div className="mb-6 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 relative z-10">
@@ -99,17 +97,17 @@ export function HeroCardDeck() {
             <span className="text-[11px] font-bold uppercase tracking-wider text-bronze">Archival Status</span>
             <span className="text-[10px] text-ink-soft">Encrypted & Sealed</span>
           </div>
-          <WaxSeal tone={activeTab === 'messages' ? 'burgundy' : activeTab === 'documents' ? 'gold' : 'moss'} size="md" text="H" />
+          <WaxSeal tone={activeTab === 'messages' ? 'burgundy' : activeTab === 'documents' ? 'gold' : 'moss'} size="md" />
         </div>
 
         <AnimatePresence mode="wait">
           {activeTab === 'assets' && (
             <motion.div
               key="assets"
-              initial={{ opacity: 0, y: 16, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -16, scale: 0.97 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               className="space-y-6 pt-2"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-ink/10 pb-5">
@@ -178,10 +176,10 @@ export function HeroCardDeck() {
           {activeTab === 'documents' && (
             <motion.div
               key="documents"
-              initial={{ opacity: 0, y: 16, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -16, scale: 0.97 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               className="space-y-6 pt-2"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-ink/10 pb-5">
@@ -245,10 +243,10 @@ export function HeroCardDeck() {
           {activeTab === 'messages' && (
             <motion.div
               key="messages"
-              initial={{ opacity: 0, y: 16, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -16, scale: 0.97 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               className="space-y-6 pt-2"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-ink/10 pb-5">
@@ -309,10 +307,10 @@ export function HeroCardDeck() {
           {activeTab === 'guardians' && (
             <motion.div
               key="guardians"
-              initial={{ opacity: 0, y: 16, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -16, scale: 0.97 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               className="space-y-6 pt-2"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-ink/10 pb-5">
