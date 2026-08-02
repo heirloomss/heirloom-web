@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { PaperLayer } from '@/components/ui/PaperLayer';
 import { Badge } from '@/components/ui/Badge';
-import { WaxSeal } from '@/components/ui/WaxSeal';
 import { HeroCardDeck } from '@/components/cards/HeroCardDeck';
 import { HeirloomLogo } from '@/components/ui/HeirloomLogo';
 import {
@@ -252,7 +251,7 @@ export default function LandingPage() {
       {/* Closing CTA with Primary Paper Diorama Frame & Gold Wax Seal */}
       <section className="paper-diorama-frame mt-12 px-6 py-16 text-center text-ink shadow-diorama md:px-16 relative overflow-hidden bg-ivory border border-ink/15">
         <div className="relative z-10 space-y-5">
-          <WaxSeal tone="gold" size="lg" className="mx-auto mb-2" />
+          <HeirloomLogo size={64} className="mx-auto mb-3 shadow-paper-3 rounded-2xl" />
           <h2 className="mx-auto max-w-2xl font-display text-4xl text-ink md:text-5xl font-bold leading-tight">
             Prepare Your Digital Legacy Today
           </h2>

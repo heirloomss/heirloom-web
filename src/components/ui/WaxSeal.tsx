@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { HeirloomLogo } from './HeirloomLogo';
 
 interface WaxSealProps {
   tone?: 'moss' | 'burgundy' | 'gold' | 'bronze';
@@ -13,19 +12,13 @@ interface WaxSealProps {
 export function WaxSeal({
   tone = 'burgundy',
   size = 'md',
-  text,
+  text = 'H',
   className = '',
 }: WaxSealProps) {
   const sizeMap = {
-    sm: 'h-8 w-8',
-    md: 'h-11 w-11',
-    lg: 'h-14 w-14',
-  };
-
-  const logoSizeMap = {
-    sm: 16,
-    md: 22,
-    lg: 28,
+    sm: 'h-8 w-8 text-xs',
+    md: 'h-11 w-11 text-base',
+    lg: 'h-14 w-14 text-xl',
   };
 
   const toneMap = {
@@ -49,14 +42,10 @@ export function WaxSeal({
       {/* Inner crest ring */}
       <div className="absolute inset-1.5 rounded-full border border-black/15 pointer-events-none" />
       
-      {/* Center content */}
-      <div className="relative z-10 flex items-center justify-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
-        {text ? (
-          <span className="font-serif tracking-tighter text-xs">{text}</span>
-        ) : (
-          <HeirloomLogo size={logoSizeMap[size]} />
-        )}
-      </div>
+      {/* Center monograph text */}
+      <span className="relative z-10 font-serif tracking-tighter drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
+        {text}
+      </span>
     </div>
   );
 }

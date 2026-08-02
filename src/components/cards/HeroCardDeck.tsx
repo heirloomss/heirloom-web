@@ -56,9 +56,9 @@ export function HeroCardDeck() {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Centered & structured background paper layers */}
-      <div className="absolute -top-4 left-1/2 -z-20 h-[90%] w-[98%] -translate-x-1/2 rounded-[32px] bg-linen/80 shadow-paper-2 border border-bronze/10" />
-      <div className="absolute -top-2 left-1/2 -z-10 h-[95%] w-[99%] -translate-x-1/2 rounded-[28px] bg-cotton shadow-paper-2 border border-moss/10" />
+      {/* Bent card-by-card background diorama paper sheets */}
+      <div className="absolute -top-6 left-1/2 -z-20 h-[92%] w-[96%] -translate-x-1/2 rounded-[36px] bg-linen/80 rotate-[-1.5deg] shadow-paper-2 border border-bronze/15 transition-transform duration-500" />
+      <div className="absolute -top-3 left-1/2 -z-10 h-[96%] w-[98%] -translate-x-1/2 rounded-[30px] bg-cotton rotate-[1.2deg] shadow-paper-3 border border-moss/15 transition-transform duration-500" />
 
       {/* Tab navigation bar */}
       <div className="mb-6 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 relative z-10">
@@ -97,7 +97,7 @@ export function HeroCardDeck() {
             <span className="text-[11px] font-bold uppercase tracking-wider text-bronze">Archival Status</span>
             <span className="text-[10px] text-ink-soft">Encrypted & Sealed</span>
           </div>
-          <WaxSeal tone={activeTab === 'messages' ? 'burgundy' : activeTab === 'documents' ? 'gold' : 'moss'} size="md" />
+          <WaxSeal tone={activeTab === 'messages' ? 'burgundy' : activeTab === 'documents' ? 'gold' : 'moss'} size="md" text="H" />
         </div>
 
         <AnimatePresence mode="wait">
@@ -123,15 +123,15 @@ export function HeroCardDeck() {
                     Funds are locked in smart contracts and distributed by percentage when triggered.
                   </p>
                 </div>
-                <div className="rounded-card bg-cotton p-3.5 text-right shadow-paper-2 border border-gold/30">
+                <div className="rounded-card bg-cotton p-3.5 text-right shadow-paper-2 border border-gold/30 rotate-[-1deg]">
                   <span className="text-[10px] uppercase font-bold text-bronze tracking-widest">Vault Total Balance</span>
                   <div className="font-mono text-2xl font-bold text-moss">$15,000.00 <span className="text-xs font-sans text-ink-soft">USDC</span></div>
                 </div>
               </div>
 
-              {/* Beneficiaries Split Cards */}
+              {/* Beneficiaries Split Cards with micro-rotations */}
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="paper-stack-deck rounded-card bg-cotton p-5 shadow-paper-2 border border-moss/20">
+                <div className="paper-stack-deck rounded-card bg-cotton p-5 shadow-paper-2 border border-moss/20 transition-transform duration-300 sm:rotate-[-1deg] hover:rotate-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <WaxSeal tone="moss" size="sm" text="S" />
@@ -148,7 +148,7 @@ export function HeroCardDeck() {
                   </div>
                 </div>
 
-                <div className="paper-stack-deck rounded-card bg-cotton p-5 shadow-paper-2 border border-bronze/20">
+                <div className="paper-stack-deck rounded-card bg-cotton p-5 shadow-paper-2 border border-bronze/20 transition-transform duration-300 sm:rotate-[1deg] hover:rotate-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <WaxSeal tone="bronze" size="sm" text="M" />
@@ -195,14 +195,14 @@ export function HeroCardDeck() {
                     House deeds, passports, tax filings, and legal wills stored safely offline.
                   </p>
                 </div>
-                <div className="inline-flex items-center gap-2 rounded-card bg-cotton px-4 py-2 text-xs font-semibold text-indigo shadow-paper-2 border border-indigo/20">
+                <div className="inline-flex items-center gap-2 rounded-card bg-cotton px-4 py-2 text-xs font-semibold text-indigo shadow-paper-2 border border-indigo/20 rotate-[1deg]">
                   <Lock className="h-4 w-4 text-indigo" />
                   <span>3 Documents Sealed</span>
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3">
-                <div className="paper-dogear paper-stack-deck rounded-card bg-cotton p-4.5 shadow-paper-2 border border-indigo/20 space-y-2.5">
+                <div className="paper-dogear paper-stack-deck rounded-card bg-cotton p-4.5 shadow-paper-2 border border-indigo/20 space-y-2.5 transition-transform duration-300 sm:rotate-[-1.2deg] hover:rotate-0">
                   <div className="flex items-center justify-between">
                     <FileText className="h-6 w-6 text-indigo" />
                     <span className="rounded bg-indigo-wash px-2 py-0.5 text-[10px] font-bold text-indigo uppercase border border-indigo/20">PDF</span>
@@ -212,7 +212,7 @@ export function HeroCardDeck() {
                   <p className="text-[11px] text-indigo font-semibold pt-1 border-t border-ink/5">Release: Immediately</p>
                 </div>
 
-                <div className="paper-dogear paper-stack-deck rounded-card bg-cotton p-4.5 shadow-paper-2 border border-indigo/20 space-y-2.5">
+                <div className="paper-dogear paper-stack-deck rounded-card bg-cotton p-4.5 shadow-paper-2 border border-indigo/20 space-y-2.5 transition-transform duration-300 sm:rotate-[0.8deg] hover:rotate-0">
                   <div className="flex items-center justify-between">
                     <FileText className="h-6 w-6 text-indigo" />
                     <span className="rounded bg-indigo-wash px-2 py-0.5 text-[10px] font-bold text-indigo uppercase border border-indigo/20">DOCX</span>
@@ -222,7 +222,7 @@ export function HeroCardDeck() {
                   <p className="text-[11px] text-indigo font-semibold pt-1 border-t border-ink/5">Release: Immediately</p>
                 </div>
 
-                <div className="paper-dogear paper-stack-deck rounded-card bg-cotton p-4.5 shadow-paper-2 border border-indigo/20 space-y-2.5">
+                <div className="paper-dogear paper-stack-deck rounded-card bg-cotton p-4.5 shadow-paper-2 border border-indigo/20 space-y-2.5 transition-transform duration-300 sm:rotate-[-0.6deg] hover:rotate-0">
                   <div className="flex items-center justify-between">
                     <KeyRound className="h-6 w-6 text-indigo" />
                     <span className="rounded bg-indigo-wash px-2 py-0.5 text-[10px] font-bold text-indigo uppercase border border-indigo/20">SECURE</span>
@@ -262,14 +262,14 @@ export function HeroCardDeck() {
                     Leave audio recordings, videos, and letters delivered on specific life milestones.
                   </p>
                 </div>
-                <div className="inline-flex items-center gap-2 rounded-card bg-cotton px-4 py-2 text-xs font-semibold text-burgundy shadow-paper-2 border border-burgundy/20">
+                <div className="inline-flex items-center gap-2 rounded-card bg-cotton px-4 py-2 text-xs font-semibold text-burgundy shadow-paper-2 border border-burgundy/20 rotate-[-1deg]">
                   <Mail className="h-4 w-4" />
                   <span>2 Personal Messages Scheduled</span>
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="paper-stack-deck rounded-card bg-cotton p-5 shadow-paper-2 border border-burgundy/20 space-y-3">
+                <div className="paper-stack-deck rounded-card bg-cotton p-5 shadow-paper-2 border border-burgundy/20 space-y-3 transition-transform duration-300 sm:rotate-[-1deg] hover:rotate-0">
                   <div className="flex items-center gap-3">
                     <WaxSeal tone="burgundy" size="md" text="V" />
                     <div>
@@ -283,7 +283,7 @@ export function HeroCardDeck() {
                   </div>
                 </div>
 
-                <div className="paper-stack-deck rounded-card bg-cotton p-5 shadow-paper-2 border border-burgundy/20 space-y-3">
+                <div className="paper-stack-deck rounded-card bg-cotton p-5 shadow-paper-2 border border-burgundy/20 space-y-3 transition-transform duration-300 sm:rotate-[1deg] hover:rotate-0">
                   <div className="flex items-center gap-3">
                     <WaxSeal tone="burgundy" size="md" text="L" />
                     <div>
@@ -340,7 +340,7 @@ export function HeroCardDeck() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3">
-                <div className="paper-stack-deck rounded-card bg-cotton p-4.5 shadow-paper-2 border border-moss/20 space-y-2">
+                <div className="paper-stack-deck rounded-card bg-cotton p-4.5 shadow-paper-2 border border-moss/20 space-y-2 transition-transform duration-300 sm:rotate-[-1deg] hover:rotate-0">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-moss bg-moss-wash px-2 py-0.5 rounded border border-moss/20">Guardian 1</span>
                     <WaxSeal tone="moss" size="sm" text="✓" />
@@ -350,7 +350,7 @@ export function HeroCardDeck() {
                   <p className="text-[11px] text-emerald-700 font-semibold pt-2 border-t border-ink/5">Status: Confirmed</p>
                 </div>
 
-                <div className="paper-stack-deck rounded-card bg-cotton p-4.5 shadow-paper-2 border border-moss/20 space-y-2">
+                <div className="paper-stack-deck rounded-card bg-cotton p-4.5 shadow-paper-2 border border-moss/20 space-y-2 transition-transform duration-300 sm:rotate-[0.8deg] hover:rotate-0">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-moss bg-moss-wash px-2 py-0.5 rounded border border-moss/20">Guardian 2</span>
                     <WaxSeal tone="moss" size="sm" text="✓" />
@@ -360,7 +360,7 @@ export function HeroCardDeck() {
                   <p className="text-[11px] text-emerald-700 font-semibold pt-2 border-t border-ink/5">Status: Confirmed</p>
                 </div>
 
-                <div className="paper-stack-deck rounded-card bg-cotton p-4.5 shadow-paper-2 border border-bronze/20 space-y-2">
+                <div className="paper-stack-deck rounded-card bg-cotton p-4.5 shadow-paper-2 border border-bronze/20 space-y-2 transition-transform duration-300 sm:rotate-[-0.6deg] hover:rotate-0">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-bronze bg-bronze-wash px-2 py-0.5 rounded border border-bronze/20">Guardian 3</span>
                     <Clock className="h-4 w-4 text-bronze" />
