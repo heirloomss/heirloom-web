@@ -282,24 +282,26 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Closing CTA with Wax Seal Backdrop */}
-      <section className="paper-diorama-frame mt-12 bg-moss px-6 py-16 text-center text-cotton shadow-diorama md:px-16 relative overflow-hidden">
-        <div className="relative z-10">
-          <WaxSeal tone="gold" size="lg" text="H" className="mx-auto mb-4" />
-          <h2 className="mx-auto max-w-2xl font-display text-4xl text-cotton md:text-5xl font-semibold">
+      {/* Closing CTA with Dark Paper Diorama & Wax Seal Backdrop */}
+      <section className="paper-diorama-frame-dark mt-12 px-6 py-16 text-center text-cotton shadow-diorama md:px-16 relative overflow-hidden">
+        <div className="relative z-10 space-y-4">
+          <WaxSeal tone="gold" size="lg" className="mx-auto mb-2" />
+          <h2 className="mx-auto max-w-2xl font-display text-4xl text-cotton md:text-5xl font-semibold leading-tight">
             Prepare Your Digital Legacy Today
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-cotton/90 text-base leading-relaxed">
+          <p className="mx-auto max-w-xl text-cotton/90 text-base leading-relaxed">
             Takes less than 10 minutes to setup. Give your family peace of mind, protected documents, and clear financial inheritance.
           </p>
-          <Link
-            href="/register"
-            className="mt-8 inline-flex min-h-[54px] items-center gap-2 rounded-button bg-cotton px-9 text-base font-semibold text-moss-deep shadow-paper-3 transition-transform duration-300 hover:-translate-y-0.5"
-          >
-            <Lock className="h-4 w-4" aria-hidden />
-            <span>Begin your legacy now</span>
-          </Link>
-          <p className="mt-8 font-display text-lg italic text-cotton/80">
+          <div className="pt-2">
+            <Link
+              href="/register"
+              className="inline-flex min-h-[54px] items-center gap-2 rounded-button bg-cotton px-9 text-base font-bold text-moss-deep shadow-paper-3 transition-transform duration-300 hover:-translate-y-0.5 hover:bg-white"
+            >
+              <Lock className="h-4 w-4" aria-hidden />
+              <span>Begin your legacy now</span>
+            </Link>
+          </div>
+          <p className="pt-4 font-display text-lg italic text-cotton/90">
             {TAGLINES[0]}
           </p>
         </div>
