@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="320" viewBox="0 0 480 320">
+  <defs>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <linearGradient id="mount" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFDF8"/>
+      <stop offset="1" stop-color="#ECE4D6"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="320" fill="url(#mount)"/>
+  <rect width="480" height="320" filter="url(#grain)" opacity="0.05"/>
+  <!-- layered paper diorama suggestions -->
+  <path d="M0 260 Q120 200 240 250 T480 240 V320 H0 Z" fill="#4A6653" opacity="0.16"/>
+  <path d="M0 285 Q140 235 260 275 T480 268 V320 H0 Z" fill="#7B4252" opacity="0.12"/>
+  <circle cx="392" cy="72" r="34" fill="#A97645" opacity="0.14"/>
+</svg>

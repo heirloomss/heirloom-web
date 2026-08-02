@@ -1,36 +1,47 @@
 'use client';
 
+import { useId } from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '@/utils/cn';
 
-/** A calm toggle — large hit target, clear states, keyboard friendly. */
-export function Switch({
-  checked,
-  onChange,
-  label,
-}: {
+interface SwitchProps {
+  label: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
-  label: string;
-}) {
+  description?: string;
+  className?: string;
+}
+
+/** A gentle on/off control — a small paper toggle with clear labeling. */
+export function Switch({ label, description, checked, onChange, className }: SwitchProps) {
+  const id = useId();
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      onClick={() => onChange(!checked)}
-      className={cn(
-        'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border px-1 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss',
-        checked ? 'border-moss bg-moss' : 'border-ink/20 bg-linen',
-      )}
-    >
-      <span
-        aria-hidden
+    <div className={cn('flex items-center justify-between gap-6 py-2', className)}>
+      <div>
+        <label htmlFor={id} className="text-base font-medium text-ink">
+          {label}
+        </label>
+        {description ? <p className="mt-0.5 text-sm text-ink-soft">{description}</p> : null}
+      </div>
+      <button
+        id={id}
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
+        onClick={() => onChange(!checked)}
         className={cn(
-          'h-5 w-5 rounded-full bg-cotton shadow-paper-1 transition-transform duration-300',
-          checked ? 'translate-x-5' : 'translate-x-0',
+          'relative h-8 w-14 shrink-0 rounded-full border transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss',
+          checked ? 'border-moss bg-moss' : 'border-ink/15 bg-linen',
         )}
-      />
-    </button>
+      >
+        <motion.span
+          aria-hidden
+          layout
+          transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+          className={cn('block h-6 w-6 rounded-full bg-cotton shadow-paper-1', checked ? 'ml-auto' : '')}
+        />
+      </button>
+    </div>
   );
 }

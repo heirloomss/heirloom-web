@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Cake, FileText, Heart, Vault, type LucideIcon } from 'lucide-react';
+import { FileText, Heart, Vault, type LucideIcon } from 'lucide-react';
 import { fadeUp, stagger } from '@/lib/motion';
 import { useLegacyJourney } from '@/hooks';
 import type { JourneyEvent } from '@/types';

@@ -88,11 +88,12 @@ export default function MessageDetailPage() {
           <div className="overflow-hidden rounded-image border-4 border-linen bg-linen/60 shadow-paper-1">
             <div className="relative aspect-video w-full">
               <Image
-                src="/paper-texture.png"
-                alt={`A framed ${message.type.toLowerCase()} — ${message.title}`}
+                src="/paper-texture.svg"
+                alt=""
                 fill
                 unoptimized
                 className="object-cover opacity-70"
+                aria-hidden
               />
               <span
                 aria-hidden

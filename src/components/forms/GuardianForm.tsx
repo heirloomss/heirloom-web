@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { useDialog } from '@/components/ui/Dialog';
 import { FormSubmit } from './FormSubmit';
 import { guardianInviteSchema, type GuardianInviteValues } from '@/lib/validation';
-import { RELATIONSHIPS } from '@/types';
+import { RELATIONSHIPS, type Guardian } from '@/types';
 import { endpoints } from '@/services/endpoints';
 
 /** Invite a trusted guardian — someone who confirms your family when needed. */
@@ -25,7 +25,11 @@ export function GuardianForm() {
 
   async function onSubmit(values: GuardianInviteValues) {
     try {
-      await endpoints.guardians.invite(values);
+      await endpoints.guardians.invite({
+        name: values.name,
+        email: values.email,
+        relationship: values.relationship as Guardian['relationship'],
+      });
     } catch {
       /* gentle offline no-op */
     }

@@ -1,220 +1,189 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell, Check, KeyRound, ShieldCheck, Wallet } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { BellRing, LogOut, Wallet } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
 import { Switch } from '@/components/ui/Switch';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { fadeUp } from '@/lib/motion';
+import { maskAccount } from '@/utils/format';
+import { useUser } from '@/hooks';
 import { endpoints } from '@/services/endpoints';
 import { linkWallet, unlinkWallet } from '@/lib/api';
-import { maskAccount } from '@/utils/format';
-import { CHECK_IN_INTERVALS, type CheckInInterval } from '@/types';
-import { useCheckIn, useUpdateProfile, useUser } from '@/hooks';
-import { stamp } from '@/lib/motion';
+import { logout } from '@/services/auth';
 
-/** Settings — your account, preferences, and connected Stellar account. */
+/** Settings — profile, Life Check-In cadence, connected account, notifications. */
 export default function SettingsPage() {
+  const router = useRouter();
   const { data: user } = useUser();
-  const { data: checkIn } = useCheckIn();
-  const updateProfile = useUpdateProfile();
+  const [checkInDays, setCheckInDays] = useState<number>(user?.checkInIntervalDays ?? 90);
+  const [walletInput, setWalletInput] = useState('');
+  const [working, setWorking] = useState(false);
+  const [notifications, setNotifications] = useState({
+    'Life Check-In reminders': true,
+    'Guardian responses': true,
+    'When a beneficiary claims': true,
+  });
 
-  const [interval, setIntervalState] = useState<CheckInInterval>(
-    (checkIn?.intervalDays as CheckInInterval) ?? 90,
-  );
-  const [name, setName] = useState(user?.name ?? '');
-  const [wallet, setWallet] = useState('');
-  const [saved, setSaved] = useState<string | null>(null);
-
-  function flash(label: string) {
-    setSaved(label);
-    window.setTimeout(() => setSaved(null), 1600);
-  }
-
-  async function saveProfile() {
+  async function connectAccount() {
+    const address = walletInput.trim();
+    if (!address) return;
+    setWorking(true);
     try {
-      await endpoints.settings.updateProfile({ name: name || undefined });
-      flash('Profile saved.');
+      await linkWallet(address);
+      setWalletInput('');
     } catch {
-      flash('Saved.');
+      /* gentle no-op */
+    } finally {
+      setWorking(false);
     }
-    updateProfile.mutate({ name: name || undefined });
-  }
-
-  async function saveInterval() {
-    try {
-      await endpoints.settings.updateCheckInInterval(interval);
-    } catch {
-      /* gentle offline */
-    }
-    flash('Check-in updated.');
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8">
-      <PageHeader title="Settings" description="Your account, your preferences, and the account you connect." />
+    <div className="max-w-2xl space-y-6">
+      <PageHeader
+        title="Settings"
+        description="A few quiet choices that keep everything just the way you like it."
+      />
 
-      <AnimatePresence>
-        {saved ? (
-          <motion.p
-            variants={stamp}
-            initial="hidden"
-            animate="visible"
-            exit={{ opacity: 0 }}
-            className="text-center text-sm font-medium text-moss-deep"
-            role="status"
+      <motion.section
+        variants={fadeUp}
+        initial="hidden"
+        animate="visible"
+        className="rounded-card bg-cotton p-7 paper-edge"
+      >
+        <h2 className="font-display text-2xl">Life Check-In</h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          We&rsquo;ll check in with you at this pace. As long as you&rsquo;re here, nothing ever
+          changes.
+        </p>
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          {[30, 90, 180].map((days) => (
+            <button
+              key={days}
+              type="button"
+              onClick={() => setCheckInDays(days)}
+              aria-pressed={checkInDays === days}
+              className={`min-h-[44px] rounded-button px-5 text-sm font-medium transition-colors duration-300 ${
+                checkInDays === days
+                  ? 'bg-moss text-cotton shadow-paper-2'
+                  : 'border border-ink/15 bg-ivory text-ink-soft hover:border-moss/40 hover:text-ink'
+              }`}
+            >
+              Every {days} days
+            </button>
+          ))}
+          <Button
+            variant="secondary"
+            disabled={working}
+            onClick={async () => {
+              setWorking(true);
+              try {
+                await endpoints.checkIn.setInterval(checkInDays);
+              } catch {
+                /* gentle offline */
+              } finally {
+                setWorking(false);
+              }
+            }}
           >
-            {saved}
-          </motion.p>
-        ) : null}
-      </AnimatePresence>
+            Save
+          </Button>
+        </div>
+      </motion.section>
 
-      {/* Profile */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-moss-wash text-moss">
-              <ShieldCheck className="h-5 w-5" strokeWidth={1.7} aria-hidden />
-            </span>
+      <motion.section
+        variants={fadeUp}
+        initial="hidden"
+        animate="visible"
+        className="rounded-card bg-cotton p-7 paper-edge"
+      >
+        <h2 className="flex items-center gap-2 font-display text-2xl">
+          <Wallet className="h-5 w-5 text-moss" strokeWidth={1.7} aria-hidden />
+          Connected Account
+        </h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          This is where everything you protect is held and, one day, released. Only you ever control
+          it.
+        </p>
+        {user?.walletAddress ? (
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-card bg-linen/50 p-5">
             <div>
-              <CardTitle>Profile</CardTitle>
-              <CardDescription>How your name appears to your family.</CardDescription>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-faint">
+                Connected
+              </p>
+              <p className="mono mt-1 text-sm text-ink">{maskAccount(user.walletAddress)}</p>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <Input
-            label="Full name"
-            defaultValue={user?.name ?? name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <Input label="Email" defaultValue={user?.email ?? ''} disabled hint="Primary sign-in. Contact us to change." />
-          <div className="flex justify-end">
-            <Button variant="secondary" onClick={saveProfile}>
-              Save changes
+            <Button
+              variant="ghost"
+              onClick={async () => {
+                try {
+                  await unlinkWallet();
+                } catch {
+                  /* ignore */
+                }
+              }}
+            >
+              Disconnect
             </Button>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Connected account */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-wash text-indigo">
-              <Wallet className="h-5 w-5" strokeWidth={1.7} aria-hidden />
-            </span>
-            <div>
-              <CardTitle>Connected Account</CardTitle>
-              <CardDescription>
-                This is how your protected assets know where to go. It's yours — you can
-                change it at any time.
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {user?.walletAddress ? (
-            <div className="flex items-center justify-between rounded-card bg-linen/50 p-4">
-              <p className="mono text-sm text-moss-deep">{maskAccount(user.walletAddress)}</p>
-              <Button
-                variant="ghost"
-                onClick={async () => {
-                  await unlinkWallet().catch(() => undefined);
-                  flash('Disconnected.');
-                }}
-              >
-                Disconnect
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-3">
+        ) : (
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="flex-1">
               <Input
-                label="Stellar account"
+                label="Account address"
                 placeholder="G…"
-                value={wallet}
-                onChange={(e) => setWallet(e.target.value)}
+                value={walletInput}
+                onChange={(e) => setWalletInput(e.target.value)}
                 className="mono"
+                hint="Your account stays entirely in your control."
               />
-              <Button
-                variant="secondary"
-                onClick={async () => {
-                  await linkWallet(wallet).catch(() => undefined);
-                  flash('Connected.');
-                }}
-              >
-                Connect account
-              </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Life Check-In */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bronze-wash text-bronze">
-              <KeyRound className="h-5 w-5" strokeWidth={1.7} aria-hidden />
-            </span>
-            <div>
-              <CardTitle>Life Check-In</CardTitle>
-              <CardDescription>We'll gently check in with you at this pace.</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Select
-            label="Every"
-            value={interval}
-            onChange={(e) => setIntervalState(Number(e.target.value) as CheckInInterval)}
-          >
-            {CHECK_IN_INTERVALS.map((d) => (
-              <option key={d} value={d}>
-                {d} days
-              </option>
-            ))}
-          </Select>
-          <div className="flex justify-end">
-            <Button variant="secondary" onClick={saveInterval}>
-              Save preference
+            <Button onClick={connectAccount} disabled={working || !walletInput.trim()}>
+              Connect
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </motion.section>
 
-      {/* Notifications */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-burgundy-wash text-burgundy">
-              <Bell className="h-5 w-5" strokeWidth={1.7} aria-hidden />
-            </span>
-            <div>
-              <CardTitle>Notifications</CardTitle>
-              <CardDescription>Gentle reminders, never alarms.</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <SwitchRow label="Check-in reminders" defaultChecked />
-          <SwitchRow label="Family updates" defaultChecked />
-          <SwitchRow label="Guardian activity" defaultChecked />
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+      <motion.section
+        variants={fadeUp}
+        initial="hidden"
+        animate="visible"
+        className="rounded-card bg-cotton p-7 paper-edge"
+      >
+        <h2 className="flex items-center gap-2 font-display text-2xl">
+          <BellRing className="h-5 w-5 text-moss" strokeWidth={1.7} aria-hidden />
+          Notifications
+        </h2>
+        <p className="mt-1 text-sm text-ink-soft">Gentle updates — never alarms.</p>
+        <div className="mt-3 divide-y divide-ink/[0.07]">
+          {Object.entries(notifications).map(([label, on]) => (
+            <Switch
+              key={label}
+              label={label}
+              checked={on}
+              onChange={(v) => setNotifications((s) => ({ ...s, [label]: v }))}
+            />
+          ))}
+        </div>
+      </motion.section>
 
-function SwitchRow({ label, defaultChecked }: { label: string; defaultChecked?: boolean }) {
-  const [on, setOn] = useState(Boolean(defaultChecked));
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <span className="text-sm font-medium text-ink">{label}</span>
-      <Switch checked={on} onChange={setOn} label={label} />
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" className="pt-2">
+        <Button
+          variant="ghost"
+          onClick={() => {
+            logout();
+            router.push('/login');
+          }}
+        >
+          <LogOut className="h-4 w-4" aria-hidden />
+          Sign out
+        </Button>
+      </motion.div>
     </div>
   );
 }
