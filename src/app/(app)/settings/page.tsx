@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { BellRing, LogOut, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
@@ -18,6 +19,7 @@ import { logout } from '@/services/auth';
 /** Settings — profile, Life Check-In cadence, connected account, notifications. */
 export default function SettingsPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: user } = useUser();
   const [checkInDays, setCheckInDays] = useState<number>(user?.checkInIntervalDays ?? 90);
   const [walletInput, setWalletInput] = useState('');
@@ -35,6 +37,7 @@ export default function SettingsPage() {
     try {
       await linkWallet(address);
       setWalletInput('');
+      queryClient.invalidateQueries({ queryKey: ['me'] });
     } catch {
       /* gentle no-op */
     } finally {
@@ -122,6 +125,7 @@ export default function SettingsPage() {
               onClick={async () => {
                 try {
                   await unlinkWallet();
+                  queryClient.invalidateQueries({ queryKey: ['me'] });
                 } catch {
                   /* ignore */
                 }

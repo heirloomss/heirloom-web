@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { endpoints } from '@/services/endpoints';
 import {
   demoActivity,
@@ -191,8 +191,14 @@ export function useCheckIn() {
 
 /** Optimistic life check-in: confirms instantly and settles with the API. */
 export function useConfirmCheckIn() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: endpoints.checkIn.confirm,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['check-in'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['activity', 'timeline'] });
+    },
     onError: () => {
       // The UI stays confirmed — check-ins fail gently.
     },

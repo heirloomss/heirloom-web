@@ -34,13 +34,14 @@ export function DocumentUploadForm() {
   });
 
   async function onSubmit(values: DocumentUploadValues) {
+    if (!file) return;
     try {
-      await uploadDocument(values.title, values.category, file ?? undefined);
+      await uploadDocument(values.title, values.category, file);
+      setSettled(true);
+      window.setTimeout(onClose, 1000);
     } catch {
-      /* offline — settle animation still plays */
+      /* offline — stay on form so user can retry */
     }
-    setSettled(true);
-    window.setTimeout(onClose, 1000);
   }
 
   return (
@@ -106,7 +107,7 @@ export function DocumentUploadForm() {
         <Button variant="ghost" onClick={onClose}>
           Not now
         </Button>
-        <FormSubmit loading={isSubmitting}>File it safely</FormSubmit>
+        <FormSubmit loading={isSubmitting} disabled={!file || isSubmitting}>File it safely</FormSubmit>
       </div>
     </form>
   );

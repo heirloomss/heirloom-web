@@ -78,7 +78,7 @@ export const endpoints = {
     list: () => apiClient.get<ArchiveDocument[]>('/archive'),
     /** Multipart upload — handled by a dedicated client helper. */
     remove: (id: string) => apiClient.delete<void>(`/archive/${id}`),
-    downloadUrl: (id: string) => `/archive/${id}/download`,
+    downloadUrl: (id: string) => `${process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ?? 'http://localhost:4000/api'}/archive/${id}/download`,
   },
 
   messages: {
