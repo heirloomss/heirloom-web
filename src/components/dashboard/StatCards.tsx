@@ -25,7 +25,7 @@ export function StatCards() {
       value: formatUsd(stats?.assetsUsd ?? 0),
       href: '/assets',
       icon: Vault,
-      tone: 'bg-moss-wash text-moss',
+      tone: 'bg-indigo-wash text-indigo',
     },
     {
       label: 'Beneficiaries',
@@ -46,7 +46,7 @@ export function StatCards() {
       value: String(stats?.documents ?? 0),
       href: '/archive',
       icon: FileText,
-      tone: 'bg-indigo-wash text-indigo',
+      tone: 'bg-moss-wash text-moss',
     },
   ];
 

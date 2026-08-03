@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Wallet } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { FormSubmit } from '@/components/forms/FormSubmit';
 import { loginSchema, type LoginValues } from '@/lib/validation';
@@ -66,6 +68,21 @@ export default function LoginPage() {
         </FormSubmit>
       </form>
 
+      <div className="mt-8 relative">
+        <div className="absolute inset-0 flex items-center" aria-hidden="true">
+          <div className="w-full border-t border-ink/10" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase tracking-widest text-ink-faint">
+          <span className="bg-cotton px-3 font-semibold">Web3 Native</span>
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <Button variant="stellar" size="lg" className="w-full font-semibold" onClick={() => router.push('/dashboard')}>
+          <Wallet className="h-5 w-5" aria-hidden />
+          Connect Freighter
+        </Button>
+      </div>
       <p className="mt-6 text-center text-sm text-ink-soft">
         New to Heirloom?{' '}
         <Link href="/register" className="font-medium text-moss-deep underline-offset-4 hover:underline">

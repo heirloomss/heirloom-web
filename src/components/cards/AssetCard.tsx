@@ -21,7 +21,7 @@ export function AssetCard({ asset }: { asset: Asset }) {
               {formatAsset(asset.amount, asset.assetCode)}
             </p>
           </div>
-          <Badge tone={asset.status === 'Protected' ? 'moss' : 'indigo'}>
+          <Badge tone={asset.status === 'Protected' ? 'indigo' : 'moss'}>
             <ShieldCheck className="mr-1 h-3.5 w-3.5" aria-hidden />
             {asset.status}
           </Badge>

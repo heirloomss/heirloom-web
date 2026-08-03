@@ -105,18 +105,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </ul>
         </nav>
 
-        <div className="mt-auto rounded-card border border-moss/15 bg-cotton p-4 shadow-paper-1 paper-stack-deck">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-bronze">
-            Connected Vault
+        <div className="mt-auto rounded-card border border-indigo/20 bg-indigo-wash/30 p-4 shadow-paper-1 paper-stack-deck">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo">
+            Stellar Vault
           </p>
           {user?.walletAddress ? (
-            <p className="mono mt-1 text-xs font-bold text-moss">{maskAccount(user.walletAddress)}</p>
+            <p className="mono mt-1 text-xs font-bold text-indigo">{maskAccount(user.walletAddress)}</p>
           ) : (
             <Link
               href="/settings"
-              className="mt-1 block text-xs text-bronze font-medium underline-offset-4 hover:underline"
+              className="mt-1 block text-xs text-indigo font-medium underline-offset-4 hover:underline"
             >
-              Connect your wallet
+              Connect Freighter
             </Link>
           )}
         </div>

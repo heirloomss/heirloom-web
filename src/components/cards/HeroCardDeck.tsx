@@ -123,9 +123,9 @@ export function HeroCardDeck() {
                     Funds are locked in smart contracts and distributed by percentage when triggered.
                   </p>
                 </div>
-                <div className="rounded-card bg-cotton p-3.5 text-right shadow-paper-2 border border-gold/30 rotate-[-1deg]">
-                  <span className="text-[10px] uppercase font-bold text-bronze tracking-widest">Vault Total Balance</span>
-                  <div className="font-mono text-2xl font-bold text-moss">$15,000.00 <span className="text-xs font-sans text-ink-soft">USDC</span></div>
+                <div className="rounded-card bg-indigo-wash/30 p-3.5 text-right shadow-paper-2 border border-indigo/20 rotate-[-1deg]">
+                  <span className="text-[10px] uppercase font-bold text-indigo tracking-widest">Stellar Vault Balance</span>
+                  <div className="font-mono text-2xl font-bold text-indigo">$15,000.00 <span className="text-xs font-sans text-indigo/70">USDC</span></div>
                 </div>
               </div>
 
