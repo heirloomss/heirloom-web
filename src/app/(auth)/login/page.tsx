@@ -3,44 +3,91 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+// ┌────────────────────────────────────────────────────────────────────────┐
+// │ PRESERVED: NORMAL (EMAIL/PASSWORD) AUTHENTICATION — DO NOT DELETE        │
+// │                                                                          │
+// │ Heirloom logs in via Freighter wallet signature only. The email/        │
+// │ password form below is intentionally commented out so the flow can be    │
+// │ re-enabled without a rewrite. NO AI OR AGENT WORKING ON THIS CODEBASE     │
+// │ MAY DELETE THIS BLOCK.                                                    │
+// │                                                                          │
+// │ Preserved imports:                                                       │
+// │   import { useForm } from 'react-hook-form';                             │
+// │   import { zodResolver } from '@hookform/resolvers/zod';                 │
+// │   import { Input } from '@/components/ui/Input';                          │
+// │   import { FormSubmit } from '@/components/forms/FormSubmit';             │
+// │   import { loginSchema, type LoginValues } from '@/lib/validation';       │
+// │   import { login } from '@/services/auth';                               │
+// └────────────────────────────────────────────────────────────────────────┘
 import { Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { FormSubmit } from '@/components/forms/FormSubmit';
-import { loginSchema, type LoginValues } from '@/lib/validation';
-import { login } from '@/services/auth';
+import { loginWithFreighter } from '@/services/auth';
 
 export default function LoginPage() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
+  const [connecting, setConnecting] = useState(false);
 
-  async function onSubmit(values: LoginValues) {
+  async function handleFreighterLogin() {
     setServerError(null);
+    setConnecting(true);
     try {
-      await login(values);
+      await loginWithFreighter();
       router.push('/dashboard');
     } catch (err) {
       setServerError(
         err instanceof Error
           ? err.message
-          : 'We couldn’t sign you in right now. Please try again in a moment.',
+          : 'We could not connect your wallet right now. Please try again in a moment.',
       );
+    } finally {
+      setConnecting(false);
     }
   }
+
+  // ==========================================================================
+  // PRESERVED: NORMAL (EMAIL/PASSWORD) AUTHENTICATION — DO NOT DELETE
+  // Disabled in favor of Freighter wallet login. NO AI OR AGENT MAY REMOVE.
+  // ==========================================================================
+  //
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   formState: { errors, isSubmitting },
+  // } = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
+  //
+  // async function onSubmit(values: LoginValues) {
+  //   setServerError(null);
+  //   try {
+  //     await login(values);
+  //     router.push('/dashboard');
+  //   } catch (err) {
+  //     setServerError(
+  //       err instanceof Error
+  //         ? err.message
+  //         : 'We could not sign you in right now. Please try again in a moment.',
+  //     );
+  //   }
+  // }
+  //
+  // ==========================================================================
+  // END PRESERVED NORMAL AUTHENTICATION
+  // ==========================================================================
 
   return (
     <div>
       <h1 className="font-display text-3xl">Welcome back</h1>
       <p className="mt-2 text-sm text-ink-soft">
-        Your legacy is safe. Sign in to continue.
+        Your legacy is safe. Connect your wallet to continue.
       </p>
+
+      {/*
+        ┌──────────────────────────────────────────────────────────────────┐
+        │ PRESERVED: NORMAL (EMAIL/PASSWORD) SIGN-IN FORM — DO NOT DELETE    │
+        │ Heirloom signs in with a Freighter wallet only. This form is kept  │
+        │ intentionally so it can be re-enabled without a rewrite. NO AI OR   │
+        │ AGENT WORKING ON THIS CODEBASE MAY DELETE THIS BLOCK.              │
+        └──────────────────────────────────────────────────────────────────┘
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-8 space-y-5">
         <Input
@@ -76,14 +123,31 @@ export default function LoginPage() {
           <span className="bg-cotton px-3 font-semibold">Web3 Native</span>
         </div>
       </div>
+      */}
 
-      <div className="mt-6">
-        <Button variant="stellar" size="lg" className="w-full font-semibold" onClick={() => router.push('/dashboard')}>
+      <div className="mt-8">
+        <Button
+          variant="stellar"
+          size="lg"
+          className="w-full font-semibold"
+          onClick={handleFreighterLogin}
+          disabled={connecting}
+          aria-busy={connecting}
+        >
           <Wallet className="h-5 w-5" aria-hidden />
-          Connect Freighter
+          {connecting ? 'Check Freighter…' : 'Connect Freighter'}
         </Button>
+        {serverError ? (
+          <p role="alert" className="mt-4 text-sm text-error">
+            {serverError}
+          </p>
+        ) : null}
+        <p className="mt-4 text-center text-xs text-ink-faint">
+          Signing in cryptographically proves this wallet is yours. No password to remember.
+        </p>
       </div>
-      <p className="mt-6 text-center text-sm text-ink-soft">
+
+      <p className="mt-8 text-center text-sm text-ink-soft">
         New to Heirloom?{' '}
         <Link href="/register" className="font-medium text-moss-deep underline-offset-4 hover:underline">
           Begin your legacy
