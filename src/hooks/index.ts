@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { endpoints } from '@/services/endpoints';
+import { isDemoMode } from '@/lib/demo';
 import {
   demoActivity,
   demoAssets,
@@ -15,7 +16,13 @@ import {
   demoStats,
   demoUser,
 } from '@/lib/demo-data';
-import type { LegacyCapsule } from '@/types';
+import type {
+  CheckInState,
+  DashboardStats,
+  GuardianSettings,
+  LegacyCapsule,
+  User,
+} from '@/types';
 import { useUpdateProfile } from './use-update-profile';
 
 export { useUpdateProfile };
@@ -44,16 +51,33 @@ const demoCapsule: LegacyCapsule = {
 };
 
 /**
- * Data hooks — every query has a warm fallback so pages always render
- * fully even while the API is not running. Never let a blank screen
- * be the user's first impression of their own legacy.
+ * Data hooks.
  *
- * `withFallback` guarantees the fallback even when the API *errors*
- * (e.g. connection refused): `placeholderData` alone only covers the
- * pending state, so on a refused request the data would otherwise
- * collapse to empty. Wrapping the queryFn means it never rejects — it
- * resolves to the demo data instead, and the page stays whole.
+ * Two modes, chosen by `NEXT_PUBLIC_DEMO_MODE` (see `@/lib/demo`):
+ *
+ *  • DEMO ON  — every query falls back to warm sample data so the complete UX
+ *    is explorable with no backend running. This is an explicit reviewer
+ *    convenience, never the production default.
+ *
+ *  • DEMO OFF (production) — NO fabricated data is ever shown. Queries fall
+ *    back to genuinely empty values (`[]` for lists, neutral zeroed objects
+ *    for singletons). A brand-new account correctly sees empty states, and a
+ *    transient API error degrades to empty rather than to fiction.
+ *
+ * `pick(demo, empty)` selects the right fallback for the current mode, and the
+ * SAME value feeds both `placeholderData` (pending state) and `withFallback`
+ * (error state) so the two can never disagree.
+ *
+ * `withFallback` guarantees the fallback even when the API *errors* (e.g.
+ * connection refused): `placeholderData` alone only covers the pending state,
+ * so on a refused request the data would otherwise collapse to undefined.
+ * Wrapping the queryFn means it never rejects — it resolves to the fallback
+ * instead, and the page stays whole.
  */
+function pick<T>(demo: T, empty: T): T {
+  return isDemoMode() ? demo : empty;
+}
+
 function withFallback<T>(fn: () => Promise<T>, fallback: T): () => Promise<T> {
   return async () => {
     try {
@@ -64,16 +88,44 @@ function withFallback<T>(fn: () => Promise<T>, fallback: T): () => Promise<T> {
   };
 }
 
+// Neutral, non-fabricated singletons used when demo mode is off.
+const emptyUser: User = {
+  id: '',
+  name: '',
+  firstName: '',
+  email: '',
+  walletAddress: null,
+  checkInIntervalDays: 90,
+  createdAt: '',
+  updatedAt: '',
+};
+
+const emptyCheckIn: CheckInState = {
+  intervalDays: 90,
+  daysRemaining: 90,
+  lastCheckIn: '',
+};
+
+const emptyGuardianSettings: GuardianSettings = {
+  requiredApprovals: 0,
+  guardianCount: 0,
+};
+
+function emptyCapsule(token: string): LegacyCapsule {
+  return { token, fromName: '', toName: '', message: '', assets: [], documents: [], messages: [] };
+}
+
 export function useUser() {
+  const fallback = pick(demoUser, emptyUser);
   return useQuery({
     queryKey: ['me'],
-    queryFn: withFallback(endpoints.me, demoUser),
-    placeholderData: demoUser,
+    queryFn: withFallback(endpoints.me, fallback),
+    placeholderData: fallback,
   });
 }
 
 export function useDashboardStats() {
-  const fallbackSummary = {
+  const demoSummary = {
     assets: demoStats.assetsUsd,
     assetsUsd: demoStats.assetsUsd,
     beneficiaries: demoStats.beneficiaries,
@@ -81,11 +133,20 @@ export function useDashboardStats() {
     documents: demoStats.documents,
     guardians: demoGuardians.length,
   };
+  const emptySummary = {
+    assets: 0,
+    assetsUsd: 0,
+    beneficiaries: 0,
+    messages: 0,
+    documents: 0,
+    guardians: 0,
+  };
+  const fallback = pick(demoSummary, emptySummary);
   return useQuery({
     queryKey: ['dashboard', 'stats'],
-    queryFn: withFallback(endpoints.dashboardSummary, fallbackSummary),
-    placeholderData: fallbackSummary,
-    select: (d) => ({
+    queryFn: withFallback(endpoints.dashboardSummary, fallback),
+    placeholderData: fallback,
+    select: (d): DashboardStats => ({
       assetsUsd: d.assetsUsd,
       beneficiaries: d.beneficiaries,
       messages: d.messages,
@@ -95,15 +156,18 @@ export function useDashboardStats() {
 }
 
 export function useBeneficiaries() {
+  const fallback = pick(demoBeneficiaries, []);
   return useQuery({
     queryKey: ['beneficiaries'],
-    queryFn: withFallback(endpoints.beneficiaries.list, demoBeneficiaries),
-    placeholderData: demoBeneficiaries,
+    queryFn: withFallback(endpoints.beneficiaries.list, fallback),
+    placeholderData: fallback,
   });
 }
 
 export function useBeneficiary(id: string) {
-  const fallback = demoBeneficiaries.find((b) => b.id === id) ?? demoBeneficiaries[0];
+  const fallback = isDemoMode()
+    ? (demoBeneficiaries.find((b) => b.id === id) ?? demoBeneficiaries[0])
+    : undefined;
   return useQuery({
     queryKey: ['beneficiaries', id],
     queryFn: withFallback(() => endpoints.beneficiaries.get(id), fallback),
@@ -112,52 +176,64 @@ export function useBeneficiary(id: string) {
 }
 
 export function useGuardians() {
+  const fallback = pick(demoGuardians, []);
   return useQuery({
     queryKey: ['guardians'],
-    queryFn: withFallback(endpoints.guardians.list, demoGuardians),
-    placeholderData: demoGuardians,
+    queryFn: withFallback(endpoints.guardians.list, fallback),
+    placeholderData: fallback,
   });
 }
 
 export function useGuardianSettings() {
-  // There is no dedicated settings endpoint; derive the approval threshold
-  // from the guardians list and the demo configuration as a warm default.
+  // There is no dedicated settings endpoint; derive the approval threshold from
+  // the guardians list. In demo mode we surface the warm demo configuration; in
+  // production we default to the same rule the API uses (min(2, count)) rather
+  // than any fabricated value.
+  const fallback = pick(demoGuardianSettings, emptyGuardianSettings);
   return useQuery({
     queryKey: ['guardians', 'settings'],
     queryFn: withFallback(async () => {
       const list = await endpoints.guardians.list();
-      return { guardianCount: list.length, requiredApprovals: demoGuardianSettings.requiredApprovals };
-    }, demoGuardianSettings),
-    placeholderData: demoGuardianSettings,
+      const requiredApprovals = isDemoMode()
+        ? demoGuardianSettings.requiredApprovals
+        : Math.min(2, list.length);
+      return { guardianCount: list.length, requiredApprovals };
+    }, fallback),
+    placeholderData: fallback,
   });
 }
 
 export function useAssets() {
+  const fallback = pick(demoAssets, []);
   return useQuery({
     queryKey: ['assets'],
-    queryFn: withFallback(endpoints.assets.list, demoAssets),
-    placeholderData: demoAssets,
+    queryFn: withFallback(endpoints.assets.list, fallback),
+    placeholderData: fallback,
   });
 }
 
 export function useDocuments() {
+  const fallback = pick(demoDocuments, []);
   return useQuery({
     queryKey: ['archive'],
-    queryFn: withFallback(endpoints.documents.list, demoDocuments),
-    placeholderData: demoDocuments,
+    queryFn: withFallback(endpoints.documents.list, fallback),
+    placeholderData: fallback,
   });
 }
 
 export function useMessages() {
+  const fallback = pick(demoMessages, []);
   return useQuery({
     queryKey: ['messages'],
-    queryFn: withFallback(endpoints.messages.list, demoMessages),
-    placeholderData: demoMessages,
+    queryFn: withFallback(endpoints.messages.list, fallback),
+    placeholderData: fallback,
   });
 }
 
 export function useMessage(id: string) {
-  const fallback = demoMessages.find((m) => m.id === id) ?? demoMessages[0];
+  const fallback = isDemoMode()
+    ? (demoMessages.find((m) => m.id === id) ?? demoMessages[0])
+    : undefined;
   return useQuery({
     queryKey: ['messages', id],
     queryFn: withFallback(() => endpoints.messages.get(id), fallback),
@@ -166,26 +242,29 @@ export function useMessage(id: string) {
 }
 
 export function useActivityTimeline() {
+  const fallback = pick(demoActivity, []);
   return useQuery({
     queryKey: ['activity', 'timeline'],
-    queryFn: withFallback(endpoints.activity.timeline, demoActivity),
-    placeholderData: demoActivity,
+    queryFn: withFallback(endpoints.activity.timeline, fallback),
+    placeholderData: fallback,
   });
 }
 
 export function useLegacyJourney() {
+  const fallback = pick(demoJourney, []);
   return useQuery({
     queryKey: ['legacy', 'journey'],
-    queryFn: withFallback(endpoints.legacy.journey, demoJourney),
-    placeholderData: demoJourney,
+    queryFn: withFallback(endpoints.legacy.journey, fallback),
+    placeholderData: fallback,
   });
 }
 
 export function useCheckIn() {
+  const fallback = pick(demoCheckIn, emptyCheckIn);
   return useQuery({
     queryKey: ['check-in'],
-    queryFn: withFallback(endpoints.checkIn.state, demoCheckIn),
-    placeholderData: demoCheckIn,
+    queryFn: withFallback(endpoints.checkIn.state, fallback),
+    placeholderData: fallback,
   });
 }
 
@@ -206,9 +285,10 @@ export function useConfirmCheckIn() {
 }
 
 export function useCapsule(token: string) {
+  const fallback = pick(demoCapsule, emptyCapsule(token));
   return useQuery<LegacyCapsule>({
     queryKey: ['legacy', 'capsule', token],
-    queryFn: withFallback(() => endpoints.legacy.capsule(token), demoCapsule),
-    placeholderData: demoCapsule,
+    queryFn: withFallback(() => endpoints.legacy.capsule(token), fallback),
+    placeholderData: fallback,
   });
 }

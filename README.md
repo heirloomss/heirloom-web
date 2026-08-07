@@ -30,9 +30,10 @@ mentions "wallets," "hashes," or "smart contracts."
 - **React Hook Form + Zod** for calm, gentle validation
 - **Lucide Icons**
 
-All screens render fully with warm fallback data when the API isn't running —
-a Stellar Wave reviewer or developer can explore the complete UX end-to-end
-without a backend.
+All screens render end-to-end without a backend when `NEXT_PUBLIC_DEMO_MODE=true`
+(explicit reviewer convenience, **off by default**). With demo mode off
+(production), API errors fall back to genuinely empty data — no fabricated
+"warm" data is ever shown.
 
 ## Getting started
 
@@ -56,6 +57,7 @@ cp .env.example .env
 | `NEXT_PUBLIC_API_URL` | Base URL of the heirloom-api REST backend (default `http://localhost:4000/api`) |
 | `NEXT_PUBLIC_STELLAR_NETWORK` | `testnet` or `mainnet` |
 | `NEXT_PUBLIC_RPC_URL` | Soroban RPC endpoint |
+| `NEXT_PUBLIC_DEMO_MODE` | Set `true` to explore the full UX with no backend. **Must be `false` for production** — when false, no fabricated data is ever shown. |
 
 ## Design language
 
@@ -74,7 +76,7 @@ cp .env.example .env
 ```
 src/
 ├── app/
-│   ├── (auth)/       # sign-in / register
+│   ├── (auth)/       # Freighter wallet sign-in (email/password preserved but disabled)
 │   ├── (app)/        # dashboard, beneficiaries, assets, archive,
 │   │                 # messages, guardians, activity, settings
 │   ├── (public)/     # the Legacy Capsule reveal
