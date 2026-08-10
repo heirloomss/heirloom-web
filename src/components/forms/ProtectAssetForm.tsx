@@ -12,15 +12,17 @@ import { FormSubmit } from './FormSubmit';
 import { protectAssetSchema, type ProtectAssetValues } from '@/lib/validation';
 import { wax } from '@/lib/motion';
 import { ASSET_CODES } from '@/types';
-import { endpoints } from '@/services/endpoints';
+import { useProtectAsset } from '@/hooks';
 
 /**
- * Protect an asset. On success a wax seal briefly settles on the card-space
- * before the new asset slides beneath the others — a small, emotional detail.
+ * Protect an asset. The asset is saved to the plan first; only once the API
+ * confirms does the wax seal settle and the dialog close. A failure surfaces a
+ * gentle message and keeps the form open so nothing is silently lost.
  */
 export function ProtectAssetForm() {
   const { onClose } = useDialog();
   const [sealed, setSealed] = useState(false);
+  const protectAsset = useProtectAsset();
 
   const {
     register,
@@ -33,15 +35,11 @@ export function ProtectAssetForm() {
 
   async function onSubmit(values: ProtectAssetValues) {
     if (values.amount <= 0) return;
-    try {
-      await endpoints.assets.protect({
-        label: values.label,
-        assetCode: values.assetCode,
-        amount: values.amount,
-      });
-    } catch {
-      /* offline — the seal still plays so the flow feels complete */
-    }
+    await protectAsset.mutateAsync({
+      label: values.label,
+      assetCode: values.assetCode,
+      amount: values.amount,
+    });
     setSealed(true);
     window.setTimeout(onClose, 1100);
   }
@@ -98,11 +96,18 @@ export function ProtectAssetForm() {
           Protected assets stay entirely yours. They are only ever shared with
           the people you choose, when the time is right.
         </p>
+        {protectAsset.isError ? (
+          <p role="alert" className="text-sm text-error">
+            {protectAsset.error instanceof Error
+              ? protectAsset.error.message
+              : 'We couldn’t protect this just now. Please try again in a moment.'}
+          </p>
+        ) : null}
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="ghost" onClick={onClose}>
             Not now
           </Button>
-          <FormSubmit loading={isSubmitting}>Protect this</FormSubmit>
+          <FormSubmit loading={isSubmitting || protectAsset.isPending}>Protect this</FormSubmit>
         </div>
       </form>
     </div>

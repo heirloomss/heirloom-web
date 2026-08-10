@@ -67,6 +67,8 @@ export interface Guardian {
   email: string;
   relationship: Relationship;
   status: GuardianStatus;
+  /** Present once the guardian connects a wallet; required before they can approve. */
+  walletAddress: string | null;
   createdAt: ISODateString;
 }
 
@@ -219,4 +221,99 @@ export interface LegacyCapsule {
   assets: Array<Pick<Asset, 'id' | 'label' | 'assetCode' | 'amount' | 'usdValue'>>;
   documents: Array<Pick<ArchiveDocument, 'id' | 'title' | 'category'>>;
   messages: Array<Pick<Message, 'id' | 'type' | 'title' | 'body' | 'durationLabel'>>;
+}
+
+// ---------------------------------------------------------------------------
+// Self-custody (build / sign / submit) shapes.
+//
+// Heirloom never holds a signing key. The API BUILDS an unsigned transaction;
+// the owner / guardian / beneficiary signs it in their own Freighter wallet;
+// the signed XDR is relayed back to POST /legacy/submit. These mirror the API's
+// stellar.types.ts and legacy DTOs.
+// ---------------------------------------------------------------------------
+
+/** On-chain plan status, mirroring the contract's LegacyStatus. */
+export type LegacyPlanStatus =
+  | 'DRAFT'
+  | 'FUNDED'
+  | 'VERIFIED'
+  | 'RELEASED'
+  | 'CANCELLED';
+
+/** An unsigned transaction envelope the client must sign in Freighter. */
+export interface UnsignedTransaction {
+  /** Base64 transaction envelope (XDR). */
+  xdr: string;
+  /** Which network Freighter should sign for. */
+  networkPassphrase: string;
+  /** The contract method this envelope calls — for display / telemetry. */
+  method: string;
+  /** The account expected to sign (source / auth). */
+  source: string;
+}
+
+/** The on-chain actions a signed transaction can carry (see submit-legacy.dto). */
+export type LegacyAction =
+  | 'protect'
+  | 'deposit'
+  | 'approve'
+  | 'release'
+  | 'claim'
+  | 'cancel';
+
+/** Payload for POST /legacy/submit — a client-signed transaction to relay. */
+export interface SubmitLegacyPayload {
+  action: LegacyAction;
+  /** The signed transaction envelope (base64 XDR) from Freighter. */
+  signedXdr: string;
+  /** Required for `approve` — the guardian whose approval this is. */
+  guardianId?: string;
+  /** Required for `claim` — the beneficiary claiming. */
+  beneficiaryId?: string;
+}
+
+/** Result of relaying a signed transaction. */
+export interface SubmitResult {
+  txHash: string;
+  status: LegacyPlanStatus;
+}
+
+/** GET /legacy overview — the plan plus a snapshot of what it protects. */
+export interface LegacyOverview {
+  plan: {
+    status: LegacyPlanStatus;
+    threshold: number;
+    contractId: string | null;
+    legacyId: string | null;
+  };
+  counts: {
+    beneficiaries: number;
+    guardians: number;
+    verifiedGuardians: number;
+    assets: number;
+  };
+  checkIn: CheckInState | null;
+  /** Whether the on-chain layer is configured (a contract id is set). */
+  onChainReady: boolean;
+}
+
+/** One beneficiary's claim package from GET /legacy/claims. */
+export interface LegacyClaimPackage {
+  beneficiary: {
+    id: string;
+    name: string;
+    relationship: Relationship;
+    allocationPercentage: number;
+  };
+  assets: Array<{ assetCode: string; amount: string; status: AssetStatus }>;
+  messages: Array<{ id: string; title: string; type: MessageType }>;
+  documents: Array<{ id: string; title: string; category: DocumentCategory }>;
+  status: 'READY_TO_CLAIM' | 'PREPARING';
+}
+
+/** GET /legacy/claims — claim packages for every beneficiary. */
+export interface LegacyClaimsResponse {
+  status: LegacyPlanStatus;
+  readyToClaim: boolean;
+  packages: LegacyClaimPackage[];
 }

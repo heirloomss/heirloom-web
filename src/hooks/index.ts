@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { endpoints } from '@/services/endpoints';
+import { uploadDocument } from '@/lib/api';
 import { isDemoMode } from '@/lib/demo';
 import {
   demoActivity,
@@ -17,15 +18,20 @@ import {
   demoUser,
 } from '@/lib/demo-data';
 import type {
+  Beneficiary,
   CheckInState,
   DashboardStats,
+  Guardian,
   GuardianSettings,
   LegacyCapsule,
+  LegacyOverview,
   User,
 } from '@/types';
 import { useUpdateProfile } from './use-update-profile';
+import { useSignAndSubmit, signStepLabel } from './use-sign-and-submit';
 
-export { useUpdateProfile };
+export { useUpdateProfile, useSignAndSubmit, signStepLabel };
+export type { SignStep } from './use-sign-and-submit';
 
 const demoCapsule: LegacyCapsule = {
   token: 'demo',
@@ -290,5 +296,83 @@ export function useCapsule(token: string) {
     queryKey: ['legacy', 'capsule', token],
     queryFn: withFallback(() => endpoints.legacy.capsule(token), fallback),
     placeholderData: fallback,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Legacy plan overview + mutations.
+//
+// Overview is a real read — no fabricated fallback. If it errors we surface a
+// neutral DRAFT so the page renders, but we never invent an on-chain plan.
+// ---------------------------------------------------------------------------
+
+const emptyOverview: LegacyOverview = {
+  plan: { status: 'DRAFT', threshold: 2, contractId: null, legacyId: null },
+  counts: { beneficiaries: 0, guardians: 0, verifiedGuardians: 0, assets: 0 },
+  checkIn: null,
+  onChainReady: false,
+};
+
+export function useLegacyOverview() {
+  return useQuery({
+    queryKey: ['legacy', 'overview'],
+    queryFn: withFallback(endpoints.legacy.overview, emptyOverview),
+    placeholderData: emptyOverview,
+  });
+}
+
+/** Add / edit a beneficiary, surfacing real errors and refreshing the list. */
+export function useSaveBeneficiary(beneficiaryId?: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: Partial<Beneficiary>) =>
+      beneficiaryId
+        ? endpoints.beneficiaries.update(beneficiaryId, payload)
+        : endpoints.beneficiaries.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['beneficiaries'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['legacy', 'overview'] });
+    },
+  });
+}
+
+/** Invite a guardian, surfacing real errors and refreshing the list. */
+export function useInviteGuardian() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: Partial<Guardian>) => endpoints.guardians.invite(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['guardians'] });
+      queryClient.invalidateQueries({ queryKey: ['guardians', 'settings'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+}
+
+/** Add an asset to the plan, surfacing real errors and refreshing totals. */
+export function useProtectAsset() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { label: string; assetCode: string; amount: number }) =>
+      endpoints.assets.protect(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assets'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['legacy', 'overview'] });
+    },
+  });
+}
+
+/** Upload an encrypted document to the archive, surfacing real errors. */
+export function useUploadDocument() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ title, category, file }: { title: string; category: string; file: File }) =>
+      uploadDocument(title, category, file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['archive'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
   });
 }

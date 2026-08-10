@@ -58,6 +58,7 @@ export const guardianInviteSchema = z.object({
     .string()
     .min(1, 'Please enter an email address.')
     .email('That email address doesn’t look quite right.'),
+  walletAddress: walletSchema,
 });
 export type GuardianInviteValues = z.infer<typeof guardianInviteSchema>;
 

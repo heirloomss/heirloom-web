@@ -53,6 +53,41 @@ export async function connectFreighter(): Promise<string> {
   return address;
 }
 
+/**
+ * Ask Freighter to sign a transaction envelope and return the signed base64 XDR.
+ *
+ * The unsigned `xdr` and its `networkPassphrase` come straight from the API's
+ * build step; `address` is the account expected to authorize it (owner,
+ * guardian, or beneficiary). Return shapes vary across Freighter versions —
+ * newer builds return `{ signedTxXdr, signerAddress }`, older ones a bare XDR
+ * string, and some surface `{ error }` — so we normalize defensively and always
+ * return the signed XDR the API relays via POST /legacy/submit.
+ */
+export async function signTransaction(
+  xdr: string,
+  opts: { networkPassphrase: string; address: string },
+): Promise<string> {
+  const api = await freighter();
+  const res = await api.signTransaction(xdr, {
+    networkPassphrase: opts.networkPassphrase,
+    address: opts.address,
+  });
+
+  if (typeof res === 'string') return res;
+
+  const error = (res as { error?: unknown })?.error;
+  if (error) {
+    throw new WalletError(friendly(typeof error === 'string' ? error : String(error)));
+  }
+
+  const signed =
+    (res as { signedTxXdr?: string })?.signedTxXdr ??
+    (res as { signedXDR?: string })?.signedXDR;
+  if (typeof signed === 'string' && signed.length > 0) return signed;
+
+  throw new WalletError('Freighter did not return a signed transaction. Please try again.');
+}
+
 /** Ask Freighter to sign `message`; returns the signature encoded as base64. */
 export async function signChallenge(message: string, address: string): Promise<string> {
   const api = await freighter();

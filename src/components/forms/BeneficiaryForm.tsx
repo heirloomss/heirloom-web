@@ -9,12 +9,12 @@ import { useDialog } from '@/components/ui/Dialog';
 import { FormSubmit } from './FormSubmit';
 import { beneficiarySchema, type BeneficiaryValues } from '@/lib/validation';
 import { RELATIONSHIPS, type Beneficiary } from '@/types';
-import { useBeneficiaries } from '@/hooks';
-import { endpoints } from '@/services/endpoints';
+import { useBeneficiaries, useSaveBeneficiary } from '@/hooks';
 
 /**
  * Add / edit a beneficiary. Validation is gentle; the allocation is kept
- * within the remaining share so totals never exceed 100%.
+ * within the remaining share so totals never exceed 100%. Saving surfaces real
+ * errors and refreshes the list — nothing is silently discarded.
  */
 export function BeneficiaryForm({
   initial,
@@ -25,6 +25,7 @@ export function BeneficiaryForm({
 }) {
   const { onClose } = useDialog();
   const { data: all = [] } = useBeneficiaries();
+  const saveBeneficiary = useSaveBeneficiary(beneficiaryId);
 
   const othersTotal = all
     .filter((b) => b.id !== beneficiaryId)
@@ -64,12 +65,7 @@ export function BeneficiaryForm({
       walletAddress: values.walletAddress || null,
       allocationPercentage: values.allocationPercentage,
     };
-    try {
-      if (beneficiaryId) await endpoints.beneficiaries.update(beneficiaryId, payload);
-      else await endpoints.beneficiaries.create(payload);
-    } catch {
-      /* API offline — the page still closes gently with demo data. */
-    }
+    await saveBeneficiary.mutateAsync(payload);
     onClose();
   }
 
@@ -101,16 +97,23 @@ export function BeneficiaryForm({
         label="Stellar account"
         optional
         placeholder="G…"
-        hint="Optional — connecting an account makes claiming seamless later."
+        hint="Optional now — but their legacy can only be released to a connected account, so they’ll need one before claiming."
         error={errors.walletAddress?.message}
         className="mono"
         {...register('walletAddress')}
       />
+      {saveBeneficiary.isError ? (
+        <p role="alert" className="text-sm text-error">
+          {saveBeneficiary.error instanceof Error
+            ? saveBeneficiary.error.message
+            : 'We couldn’t save this just now. Please try again in a moment.'}
+        </p>
+      ) : null}
       <div className="flex justify-end gap-3 pt-2">
         <Button variant="ghost" onClick={onClose}>
           Not now
         </Button>
-        <FormSubmit loading={isSubmitting}>
+        <FormSubmit loading={isSubmitting || saveBeneficiary.isPending}>
           {beneficiaryId ? 'Save changes' : 'Add to my legacy'}
         </FormSubmit>
       </div>

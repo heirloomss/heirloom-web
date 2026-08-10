@@ -9,8 +9,13 @@ import type {
   GuardianSettings,
   JourneyEvent,
   LegacyCapsule,
+  LegacyClaimsResponse,
+  LegacyOverview,
   Message,
   NotificationPreferences,
+  SubmitLegacyPayload,
+  SubmitResult,
+  UnsignedTransaction,
   User,
 } from '@/types';
 
@@ -57,8 +62,16 @@ export const endpoints = {
     invite: (data: Partial<Guardian>) => apiClient.post<Guardian>('/guardians', data),
     update: (id: string, data: Partial<Guardian>) =>
       apiClient.patch<Guardian>(`/guardians/${id}`, data),
-    /** Guardian confirms during verification. */
-    approve: (id: string) => apiClient.post<Guardian>(`/guardians/${id}/approve`),
+    /**
+     * Build the unsigned approve_guardian transaction for the guardian to sign
+     * in their own Freighter wallet. `guardianAddress` is optional — the API
+     * falls back to the guardian's stored walletAddress.
+     */
+    approveBuild: (id: string, guardianAddress?: string) =>
+      apiClient.post<UnsignedTransaction>(
+        `/guardians/${id}/approve/build`,
+        guardianAddress ? { guardianAddress } : {},
+      ),
     remove: (id: string) => apiClient.delete<void>(`/guardians/${id}`),
   },
 
@@ -104,12 +117,33 @@ export const endpoints = {
       apiClient.post<CheckInStatusResponse>('/activity/checkin', { intervalDays }),
   },
 
-  /** Legacy: plan overview, protect, simulated verification/release, claims. */
+  /**
+   * Legacy — the self-custodial lifecycle. Every state change is a two-step
+   * handshake: a `*Build` call returns an unsigned transaction the owner /
+   * guardian / beneficiary signs in Freighter, then `submit` relays the signed
+   * XDR and the API reconciles the database. The API never holds a signing key.
+   */
   legacy: {
-    overview: () => apiClient.get<Record<string, unknown>>('/legacy'),
-    protect: (data: unknown) => apiClient.post('/legacy/protect', data),
-    simulateRelease: () => apiClient.post('/legacy/simulate-release'),
-    claims: () => apiClient.get<LegacyCapsule[]>('/legacy/claims'),
+    overview: () => apiClient.get<LegacyOverview>('/legacy'),
+    /** Build create_legacy (owner-signed) — Draft. */
+    protectBuild: (data?: { threshold?: number; token?: string }) =>
+      apiClient.post<UnsignedTransaction>('/legacy/protect/build', data ?? {}),
+    /** Build deposit (owner-signed) — Draft → Funded. */
+    depositBuild: () => apiClient.post<UnsignedTransaction>('/legacy/deposit/build'),
+    /** Build finalize_release (permissionless; caller pays the fee). */
+    releaseBuild: (callerAddress: string) =>
+      apiClient.post<UnsignedTransaction>('/legacy/release/build', { callerAddress }),
+    /** Build claim_assets (beneficiary-signed). */
+    claimBuild: (beneficiaryId: string, beneficiaryAddress: string) =>
+      apiClient.post<UnsignedTransaction>('/legacy/claim/build', {
+        beneficiaryId,
+        beneficiaryAddress,
+      }),
+    /** Build cancel_legacy (owner-signed) — refunds any deposit. */
+    cancelBuild: () => apiClient.post<UnsignedTransaction>('/legacy/cancel/build'),
+    /** Relay a client-signed transaction and reconcile the database. */
+    submit: (data: SubmitLegacyPayload) => apiClient.post<SubmitResult>('/legacy/submit', data),
+    claims: () => apiClient.get<LegacyClaimsResponse>('/legacy/claims'),
     /** The Legacy Journey timeline. */
     journey: () => apiClient.get<JourneyEvent[]>('/legacy'),
     /** A beneficiary's guided Legacy Capsule reveal. */
