@@ -15,6 +15,8 @@ export interface User {
   /** Stellar account — surfaced to users only as "Connected Account". */
   walletAddress: string | null;
   checkInIntervalDays: number;
+  /** Per-channel courtesy-email toggles; the API always returns a full object. */
+  notificationPrefs: NotificationPreferences;
   createdAt: ISODateString;
   updatedAt: ISODateString;
 }
@@ -206,10 +208,18 @@ export interface DashboardStats {
 export type CheckInInterval = 30 | 90 | 180;
 export const CHECK_IN_INTERVALS: CheckInInterval[] = [30, 90, 180];
 
+/**
+ * The owner's courtesy-email toggles. These mirror the API's channels exactly
+ * and gate ONLY emails to the owner's own inbox — safety emails to guardians
+ * and beneficiaries are never affected. All default to on.
+ */
 export interface NotificationPreferences {
+  /** Upcoming Life Check-In reminders. */
   checkInReminders: boolean;
-  familyUpdates: boolean;
-  guardianActivity: boolean;
+  /** When a guardian accepts / responds to a request. */
+  guardianResponses: boolean;
+  /** When a beneficiary receives what was left for them. */
+  beneficiaryClaims: boolean;
 }
 
 /** A beneficiary claim package / guided Legacy Capsule reveal. */
@@ -218,7 +228,20 @@ export interface LegacyCapsule {
   fromName: string;
   toName: string;
   message: string;
-  assets: Array<Pick<Asset, 'id' | 'label' | 'assetCode' | 'amount' | 'usdValue'>>;
+  /**
+   * The plan's on-chain status. Drives the capsule's call-to-action: only once
+   * it reaches VERIFIED can the beneficiary begin, and only at RELEASED can they
+   * claim their share. Before VERIFIED the API reveals nothing private.
+   */
+  status: LegacyPlanStatus;
+  /** True once the legacy is RELEASED and the beneficiary can claim. */
+  readyToClaim: boolean;
+  assets: Array<
+    Pick<Asset, 'id' | 'label' | 'assetCode' | 'amount'> & {
+      /** Only present for stablecoins (face value); never fabricated otherwise. */
+      usdValue?: number;
+    }
+  >;
   documents: Array<Pick<ArchiveDocument, 'id' | 'title' | 'category'>>;
   messages: Array<Pick<Message, 'id' | 'type' | 'title' | 'body' | 'durationLabel'>>;
 }

@@ -27,6 +27,7 @@ export const demoUser: User = {
   phone: '+1 (415) 555-0134',
   walletAddress: 'GAs7Qk2wYvUxM3n9rT5pLbC8dHf1jZ4oV6eN0sWqRtYuIoPaSdFgHjKl',
   checkInIntervalDays: 90,
+  notificationPrefs: { checkInReminders: true, guardianResponses: true, beneficiaryClaims: true },
   createdAt: '2026-01-12T09:00:00.000Z',
   updatedAt: '2026-07-14T09:00:00.000Z',
 };
@@ -87,6 +88,7 @@ export const demoGuardians: Guardian[] = [
     email: 'ben@example.com',
     relationship: 'Brother',
     status: 'Verified',
+    walletAddress: 'GBEN4Qk2wYvUxM3n9rT5pLbC8dHf1jZ4oV6eN0sWqRtYuIoPaSdFgHjK',
     createdAt: '2026-02-10T09:00:00.000Z',
   },
   {
@@ -96,6 +98,7 @@ export const demoGuardians: Guardian[] = [
     email: 'laila@lawfirm.example',
     relationship: 'Lawyer',
     status: 'Verified',
+    walletAddress: 'GLAI7Qk2wYvUxM3n9rT5pLbC8dHf1jZ4oV6eN0sWqRtYuIoPaSdFgHj',
     createdAt: '2026-02-12T09:00:00.000Z',
   },
   {
@@ -105,6 +108,7 @@ export const demoGuardians: Guardian[] = [
     email: 'tomas@example.com',
     relationship: 'Friend',
     status: 'Pending',
+    walletAddress: null,
     createdAt: '2026-03-01T09:00:00.000Z',
   },
 ];
@@ -374,8 +378,8 @@ export const demoStats: DashboardStats = {
 
 export const demoNotifications: NotificationPreferences = {
   checkInReminders: true,
-  familyUpdates: true,
-  guardianActivity: true,
+  guardianResponses: true,
+  beneficiaryClaims: true,
 };
 
 export function beneficiaryName(id: string | null | undefined): string | null {

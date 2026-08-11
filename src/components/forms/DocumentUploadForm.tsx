@@ -12,17 +12,23 @@ import { useDialog } from '@/components/ui/Dialog';
 import { FormSubmit } from './FormSubmit';
 import { documentUploadSchema, type DocumentUploadValues } from '@/lib/validation';
 import { DOCUMENT_CATEGORIES } from '@/types';
-import { uploadDocument } from '@/lib/api';
+import { useUploadDocument } from '@/hooks';
 
 /**
  * Upload a document to the Digital Archive. The chosen file slides gently
  * into an archival folder — no plain progress bar.
+ *
+ * The file is sent to the API over HTTPS and encrypted there with
+ * AES-256-GCM before it is ever written to storage; only ciphertext is
+ * persisted. Saving surfaces real errors and refreshes the archive — nothing
+ * is silently discarded.
  */
 export function DocumentUploadForm() {
   const { onClose } = useDialog();
   const [file, setFile] = useState<File | null>(null);
   const [settled, setSettled] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const uploadDoc = useUploadDocument();
 
   const {
     register,
@@ -35,13 +41,9 @@ export function DocumentUploadForm() {
 
   async function onSubmit(values: DocumentUploadValues) {
     if (!file) return;
-    try {
-      await uploadDocument(values.title, values.category, file);
-      setSettled(true);
-      window.setTimeout(onClose, 1000);
-    } catch {
-      /* offline — stay on form so user can retry */
-    }
+    await uploadDoc.mutateAsync({ title: values.title, category: values.category, file });
+    setSettled(true);
+    window.setTimeout(onClose, 1000);
   }
 
   return (
@@ -82,7 +84,7 @@ export function DocumentUploadForm() {
                 {file ? file.name : 'Choose a document to file away'}
               </span>
               <span className="mt-1 text-xs text-ink-faint">
-                It will be encrypted before it ever leaves your device.
+                It’s encrypted with AES-256 the moment it arrives, and stored that way.
               </span>
             </motion.span>
           )}
@@ -103,11 +105,21 @@ export function DocumentUploadForm() {
         ))}
       </Select>
 
+      {uploadDoc.isError ? (
+        <p role="alert" className="text-sm text-error">
+          {uploadDoc.error instanceof Error
+            ? uploadDoc.error.message
+            : 'We couldn’t file this just now. Please try again in a moment.'}
+        </p>
+      ) : null}
+
       <div className="flex justify-end gap-3 pt-2">
         <Button variant="ghost" onClick={onClose}>
           Not now
         </Button>
-        <FormSubmit loading={isSubmitting} disabled={!file || isSubmitting}>File it safely</FormSubmit>
+        <FormSubmit loading={isSubmitting || uploadDoc.isPending} disabled={!file || isSubmitting || uploadDoc.isPending}>
+          File it safely
+        </FormSubmit>
       </div>
     </form>
   );

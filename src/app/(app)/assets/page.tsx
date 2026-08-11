@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { AssetCard } from '@/components/cards/AssetCard';
 import { ProtectAssetForm } from '@/components/forms/ProtectAssetForm';
+import { LegacyProtectionPanel } from '@/components/legacy/LegacyProtectionPanel';
 import { stagger } from '@/lib/motion';
 import { formatUsd } from '@/utils/format';
 import { useAssets } from '@/hooks';
@@ -56,6 +57,10 @@ export default function AssetsPage() {
               <AssetCard key={asset.id} asset={asset} />
             ))}
           </motion.ul>
+
+          <div className="mt-10">
+            <LegacyProtectionPanel />
+          </div>
         </>
       )}
 

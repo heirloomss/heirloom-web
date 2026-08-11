@@ -63,7 +63,7 @@ export default function LandingPage() {
           <div className="inline-flex items-center gap-2 rounded-full border border-bronze/30 bg-ivory px-4 py-1.5 shadow-paper-1">
             <Sparkles className="h-4 w-4 text-bronze" />
             <span className="text-xs font-semibold uppercase tracking-wider text-bronze">
-              Zero-Knowledge Legacy Planning
+              Self-Custody Legacy Planning
             </span>
           </div>
 
@@ -89,14 +89,14 @@ export default function LandingPage() {
               className="inline-flex min-h-[52px] items-center gap-2 rounded-button border border-ink/15 bg-ivory px-7 text-base font-semibold text-ink shadow-paper-1 transition-all duration-300 hover:bg-linen"
             >
               <Lock className="h-4 w-4 text-moss" aria-hidden />
-              <span>Explore Demo Vault</span>
+              <span>Sign In</span>
             </Link>
           </div>
 
           {/* Trust points */}
           <div className="flex flex-wrap items-center justify-center gap-6 pt-6 text-xs font-medium text-ink-soft">
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-moss" /> Client-Side Encryption
+              <CheckCircle2 className="h-4 w-4 text-moss" /> AES-256 Encryption at Rest
             </span>
             <span className="flex items-center gap-1.5">
               <CheckCircle2 className="h-4 w-4 text-moss" /> 2-of-3 Guardian Verification
@@ -130,7 +130,7 @@ export default function LandingPage() {
             </span>
             <h3 className="font-display text-2xl font-bold text-ink">1. Build Your Vault</h3>
             <p className="text-sm text-ink-soft leading-relaxed">
-              Upload critical documents (wills, deeds, insurance) and write personal letters or milestone videos. All files are encrypted on your local device with AES-256 before storage.
+              Upload critical documents (wills, deeds, insurance) and write personal letters or milestone videos. Every file is encrypted with AES-256-GCM the moment it reaches us, and only ever stored as ciphertext.
             </p>
           </div>
 

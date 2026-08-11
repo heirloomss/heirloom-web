@@ -125,6 +125,11 @@ export const endpoints = {
    */
   legacy: {
     overview: () => apiClient.get<LegacyOverview>('/legacy'),
+    /** The "N of M" guardian approval threshold and guardian count. */
+    guardianSettings: () => apiClient.get<GuardianSettings>('/legacy/guardian-settings'),
+    /** Persist the approval threshold (draft plans only). */
+    setThreshold: (threshold: number) =>
+      apiClient.patch<GuardianSettings>('/legacy/threshold', { threshold }),
     /** Build create_legacy (owner-signed) — Draft. */
     protectBuild: (data?: { threshold?: number; token?: string }) =>
       apiClient.post<UnsignedTransaction>('/legacy/protect/build', data ?? {}),
@@ -146,15 +151,52 @@ export const endpoints = {
     claims: () => apiClient.get<LegacyClaimsResponse>('/legacy/claims'),
     /** The Legacy Journey timeline. */
     journey: () => apiClient.get<JourneyEvent[]>('/legacy'),
-    /** A beneficiary's guided Legacy Capsule reveal. */
-    capsule: (token: string) => apiClient.get<LegacyCapsule>(`/legacy/claims/${token}`),
+  },
+
+  /**
+   * Claim — the PUBLIC Legacy Capsule at /claim/:token. A beneficiary has no
+   * account, so every call here is unauthenticated (`skipAuth`) and scoped only
+   * by the unguessable token in the URL. The token lets them VIEW the capsule
+   * and BUILD the two transactions they sign in their own Freighter wallet; it
+   * can never move funds on its own.
+   */
+  claim: {
+    /** A beneficiary's guided Legacy Capsule reveal (gated until released). */
+    capsule: (token: string) =>
+      apiClient.get<LegacyCapsule>(`/claim/${token}`, { skipAuth: true }),
+    /** Build finalize_release (permissionless; the beneficiary pays the fee). */
+    releaseBuild: (token: string, callerAddress: string) =>
+      apiClient.post<UnsignedTransaction>(
+        `/claim/${token}/release/build`,
+        { callerAddress },
+        { skipAuth: true },
+      ),
+    /** Build claim_assets (beneficiary-signed). */
+    claimBuild: (token: string, beneficiaryAddress: string) =>
+      apiClient.post<UnsignedTransaction>(
+        `/claim/${token}/claim/build`,
+        { beneficiaryAddress },
+        { skipAuth: true },
+      ),
+    /** Relay a beneficiary-signed transaction and reconcile. */
+    submit: (token: string, data: { action: 'release' | 'claim'; signedXdr: string }) =>
+      apiClient.post<SubmitResult>(`/claim/${token}/submit`, data, { skipAuth: true }),
   },
 
   settings: {
-    updateProfile: (data: Partial<User>) => apiClient.patch<User>('/users/me', data),
+    updateProfile: (data: UpdateProfileInput) => apiClient.patch<User>('/users/me', data),
     updateCheckInInterval: (intervalDays: number) =>
       apiClient.post<CheckInStatusResponse>('/activity/checkin', { intervalDays }),
   },
+};
+
+/**
+ * Fields the owner may change on their own profile. `notificationPrefs` accepts
+ * a partial toggle — the API merges it onto the stored channels, so sending one
+ * flag never clears the others.
+ */
+export type UpdateProfileInput = Partial<Omit<User, 'notificationPrefs'>> & {
+  notificationPrefs?: Partial<NotificationPreferences>;
 };
 
 // Referenced types used only for method signatures above; re-exported so the

@@ -10,10 +10,11 @@ interface SwitchProps {
   onChange: (checked: boolean) => void;
   description?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 /** A gentle on/off control — a small paper toggle with clear labeling. */
-export function Switch({ label, description, checked, onChange, className }: SwitchProps) {
+export function Switch({ label, description, checked, onChange, className, disabled }: SwitchProps) {
   const id = useId();
   return (
     <div className={cn('flex items-center justify-between gap-6 py-2', className)}>
@@ -29,9 +30,10 @@ export function Switch({ label, description, checked, onChange, className }: Swi
         role="switch"
         aria-checked={checked}
         aria-label={label}
+        disabled={disabled}
         onClick={() => onChange(!checked)}
         className={cn(
-          'relative h-8 w-14 shrink-0 rounded-full border transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss',
+          'relative h-8 w-14 shrink-0 rounded-full border transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss disabled:cursor-not-allowed disabled:opacity-60',
           checked ? 'border-moss bg-moss' : 'border-ink/15 bg-linen',
         )}
       >

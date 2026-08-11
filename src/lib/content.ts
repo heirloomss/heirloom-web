@@ -46,9 +46,9 @@ export const FEATURES: Feature[] = [
   },
   {
     title: 'Encrypted Document Vault',
-    subtitle: 'AES-256 Client Encryption',
+    subtitle: 'AES-256-GCM at Rest',
     description:
-      'Store property deeds, passports, tax records, and legal wills. Files are encrypted on your device before upload, so only your named beneficiaries can decrypt them.',
+      'Store property deeds, passports, tax records, and legal wills. Every file is encrypted with AES-256-GCM over a secure connection and only ever kept as ciphertext, released to your beneficiaries when the time is right.',
     icon: FileText,
     tone: 'indigo',
   },
@@ -136,7 +136,7 @@ export const LEGACY_JOURNEY = {
 export const FAQS = [
   {
     question: 'What is Heirloom and how does it work?',
-    answer: 'Heirloom is a digital legacy platform that combines client-side document encryption and Stellar smart contracts. You upload important documents, set fund allocation percentages, write letters, and pick 2-3 trusted guardians. If you miss your periodic check-ins and guardians confirm your status, your inheritance plan executes automatically.'
+    answer: 'Heirloom is a digital legacy platform that combines strong document encryption with Stellar smart contracts. You upload important documents, set fund allocation percentages, write letters, and pick 2-3 trusted guardians. If you miss your periodic check-ins and guardians confirm your status, your inheritance plan executes automatically.'
   },
   {
     question: 'What happens if I accidentally miss a Life Check-In?',
@@ -148,6 +148,6 @@ export const FAQS = [
   },
   {
     question: 'Are my private documents and messages safe?',
-    answer: 'Yes. All documents and messages are encrypted on your local browser using zero-knowledge encryption before reaching our servers. Heirloom cannot read your files — only your intended beneficiaries holding the decryption key can unlock them.'
+    answer: 'Yes. Every document and message is encrypted with AES-256-GCM over a secure connection and stored only as ciphertext — never in the clear. The contents are released solely to the beneficiaries you name, when your plan is verified and executes.'
   }
 ];

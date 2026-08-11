@@ -39,6 +39,8 @@ const demoCapsule: LegacyCapsule = {
   toName: 'Sarah',
   message:
     'A gift has been prepared for you with great care. Take your time. There is no rush to open everything at once.',
+  status: 'RELEASED',
+  readyToClaim: true,
   assets: [
     { id: 'ast_savings', label: 'Family Savings', assetCode: 'USDC', amount: 8000, usdValue: 8000 },
   ],
@@ -102,6 +104,7 @@ const emptyUser: User = {
   email: '',
   walletAddress: null,
   checkInIntervalDays: 90,
+  notificationPrefs: { checkInReminders: true, guardianResponses: true, beneficiaryClaims: true },
   createdAt: '',
   updatedAt: '',
 };
@@ -118,7 +121,17 @@ const emptyGuardianSettings: GuardianSettings = {
 };
 
 function emptyCapsule(token: string): LegacyCapsule {
-  return { token, fromName: '', toName: '', message: '', assets: [], documents: [], messages: [] };
+  return {
+    token,
+    fromName: '',
+    toName: '',
+    message: '',
+    status: 'DRAFT',
+    readyToClaim: false,
+    assets: [],
+    documents: [],
+    messages: [],
+  };
 }
 
 export function useUser() {
@@ -191,21 +204,31 @@ export function useGuardians() {
 }
 
 export function useGuardianSettings() {
-  // There is no dedicated settings endpoint; derive the approval threshold from
-  // the guardians list. In demo mode we surface the warm demo configuration; in
-  // production we default to the same rule the API uses (min(2, count)) rather
-  // than any fabricated value.
+  // The API owns the approval threshold: GET /legacy/guardian-settings returns
+  // the persisted "N of M" (falling back to the same min(2, count) rule the
+  // on-chain build uses). In demo mode we surface the warm demo configuration;
+  // in production we never fabricate a value.
   const fallback = pick(demoGuardianSettings, emptyGuardianSettings);
   return useQuery({
     queryKey: ['guardians', 'settings'],
     queryFn: withFallback(async () => {
-      const list = await endpoints.guardians.list();
-      const requiredApprovals = isDemoMode()
-        ? demoGuardianSettings.requiredApprovals
-        : Math.min(2, list.length);
-      return { guardianCount: list.length, requiredApprovals };
+      if (isDemoMode()) return demoGuardianSettings;
+      return endpoints.legacy.guardianSettings();
     }, fallback),
     placeholderData: fallback,
+  });
+}
+
+/** Persist the guardian approval threshold and refresh the derived settings. */
+export function useSetThreshold() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (threshold: number) => endpoints.legacy.setThreshold(threshold),
+    onSuccess: (settings) => {
+      queryClient.setQueryData(['guardians', 'settings'], settings);
+      queryClient.invalidateQueries({ queryKey: ['guardians', 'settings'] });
+      queryClient.invalidateQueries({ queryKey: ['legacy', 'overview'] });
+    },
   });
 }
 

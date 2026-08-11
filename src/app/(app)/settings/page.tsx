@@ -12,25 +12,45 @@ import { Switch } from '@/components/ui/Switch';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { fadeUp } from '@/lib/motion';
 import { maskAccount } from '@/utils/format';
-import { useUser } from '@/hooks';
+import { useUser, useUpdateProfile } from '@/hooks';
 import { endpoints } from '@/services/endpoints';
 import { linkWallet, unlinkWallet } from '@/lib/api';
 import { connectFreighter } from '@/services/wallet';
 import { logout } from '@/services/auth';
+import type { NotificationPreferences } from '@/types';
+
+/** The courtesy-email channels the owner can quiet, in the order they appear. */
+const NOTIFICATION_CHANNELS: { channel: keyof NotificationPreferences; label: string }[] = [
+  { channel: 'checkInReminders', label: 'Life Check-In reminders' },
+  { channel: 'guardianResponses', label: 'Guardian responses' },
+  { channel: 'beneficiaryClaims', label: 'When a beneficiary claims' },
+];
 
 /** Settings — profile, Life Check-In cadence, connected account, notifications. */
 export default function SettingsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: user } = useUser();
+  const updateProfile = useUpdateProfile();
   const [checkInDays, setCheckInDays] = useState<number>(user?.checkInIntervalDays ?? 90);
   const [working, setWorking] = useState(false);
   const [walletError, setWalletError] = useState<string | null>(null);
-  const [notifications, setNotifications] = useState({
-    'Life Check-In reminders': true,
-    'Guardian responses': true,
-    'When a beneficiary claims': true,
-  });
+  const [checkInError, setCheckInError] = useState<string | null>(null);
+  const [checkInSaved, setCheckInSaved] = useState(false);
+
+  // Notification toggles are the owner's real, persisted preferences. The API
+  // always returns a full object, so this is defined for every signed-in user.
+  const prefs: NotificationPreferences = user?.notificationPrefs ?? {
+    checkInReminders: true,
+    guardianResponses: true,
+    beneficiaryClaims: true,
+  };
+
+  // Persist a single channel toggle. The API merges the partial onto the stored
+  // prefs, so flipping one switch never disturbs the others.
+  function toggleChannel(channel: keyof NotificationPreferences, value: boolean) {
+    updateProfile.mutate({ notificationPrefs: { [channel]: value } });
+  }
 
   // Connect the real Freighter wallet and link its verified address. This
   // replaces the old free-text address field, which could not prove ownership.
@@ -46,6 +66,29 @@ export default function SettingsPage() {
         err instanceof Error
           ? err.message
           : 'We could not connect your wallet right now. Please try again in a moment.',
+      );
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  // Save the Life Check-In cadence. Failures are surfaced honestly — never
+  // swallowed — so the owner knows if their choice did not take.
+  async function saveCheckInInterval() {
+    setCheckInError(null);
+    setCheckInSaved(false);
+    setWorking(true);
+    try {
+      await endpoints.checkIn.setInterval(checkInDays);
+      queryClient.invalidateQueries({ queryKey: ['check-in'] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      setCheckInSaved(true);
+    } catch (err) {
+      setCheckInError(
+        err instanceof Error
+          ? err.message
+          : 'We couldn’t save your check-in pace just now. Please try again.',
       );
     } finally {
       setWorking(false);
@@ -75,7 +118,11 @@ export default function SettingsPage() {
             <button
               key={days}
               type="button"
-              onClick={() => setCheckInDays(days)}
+              onClick={() => {
+                setCheckInDays(days);
+                setCheckInSaved(false);
+                setCheckInError(null);
+              }}
               aria-pressed={checkInDays === days}
               className={`min-h-[44px] rounded-button px-5 text-sm font-medium transition-colors duration-300 ${
                 checkInDays === days
@@ -86,23 +133,17 @@ export default function SettingsPage() {
               Every {days} days
             </button>
           ))}
-          <Button
-            variant="secondary"
-            disabled={working}
-            onClick={async () => {
-              setWorking(true);
-              try {
-                await endpoints.checkIn.setInterval(checkInDays);
-              } catch {
-                /* gentle offline */
-              } finally {
-                setWorking(false);
-              }
-            }}
-          >
+          <Button variant="secondary" disabled={working} onClick={saveCheckInInterval}>
             Save
           </Button>
         </div>
+        {checkInError ? (
+          <p role="alert" className="mt-3 text-sm text-error">
+            {checkInError}
+          </p>
+        ) : checkInSaved ? (
+          <p className="mt-3 text-sm text-moss">Saved. We&rsquo;ll check in every {checkInDays} days.</p>
+        ) : null}
       </motion.section>
 
       <motion.section
@@ -200,15 +241,21 @@ export default function SettingsPage() {
         </h2>
         <p className="mt-1 text-sm text-ink-soft">Gentle updates — never alarms.</p>
         <div className="mt-3 divide-y divide-ink/[0.07]">
-          {Object.entries(notifications).map(([label, on]) => (
+          {NOTIFICATION_CHANNELS.map(({ channel, label }) => (
             <Switch
-              key={label}
+              key={channel}
               label={label}
-              checked={on}
-              onChange={(v) => setNotifications((s) => ({ ...s, [label]: v }))}
+              checked={prefs[channel]}
+              disabled={updateProfile.isPending}
+              onChange={(v) => toggleChannel(channel, v)}
             />
           ))}
         </div>
+        {updateProfile.isError ? (
+          <p role="alert" className="mt-3 text-sm text-error">
+            We couldn&rsquo;t save that change just now. Please try again.
+          </p>
+        ) : null}
       </motion.section>
 
       <motion.div variants={fadeUp} initial="hidden" animate="visible" className="pt-2">
