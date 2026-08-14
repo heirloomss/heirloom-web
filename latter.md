@@ -1,262 +1,266 @@
-# Heirloom — AI-runnable completion script (`latter.md`)
+# Heirloome — AI-runnable completion script (`latter.md`)
 
 > **For an AI agent**: When the user says "run latter.md," execute every step
-> below in order. This script finishes what `user_task.md` started — it installs
-> dependencies, migrates the database, verifies types and lint, builds both apps,
-> and honestly reports what worked and what requires manual intervention. It
-> commits the result but **never pushes** (the user reviews and pushes).
+> below **in order**. The human has already finished `user_task.md`: Freighter
+> accounts are funded, the Soroban contract is deployed, Postgres and Redis are
+> running, R2 and Resend keys exist, and both `.env` files are filled. Your job
+> is to install, migrate, verify, build, and prove the stack is **live** — not
+> mocked. Commit local fixes if needed. **Never push.**
+
+Workspace layout (sibling repos):
+
+```
+heirloom/
+  heirloom-web/
+  heirloom-api/
+  heirloom-contracts/
+```
+
+If a path differs, locate the three repos and continue. Do not invent env values.
 
 ---
 
-## Context
+## Hard rules
 
-You are working with three repositories side by side in `~/heirlooms`:
-
-- `heirloom-web` — Next.js 15 front end (TypeScript, TanStack Query, Tailwind)
-- `heirloom-api` — NestJS 11 API (Prisma, Postgres, Redis, Stellar SDK)
-- `heirloom-contracts` — Soroban `legacy` smart contract (Rust)
-
-The human has completed `user_task.md`: Freighter is installed and funded,
-Postgres and Redis are running (Docker), `heirloom-api/.env` and
-`heirloom-web/.env.local` are filled, and secrets are generated. Your job is to
-install, migrate, verify, build, and commit.
+- **Stop on the first real failure.** Report the exact error. Do not skip ahead
+  and do not fabricate success.
+- **No placeholders.** If `JWT_SECRET` is `change-me…`, `ENCRYPTION_KEY` is all
+  zeros, `HEIRLOOM_CONTRACT_ID` is empty, R2 keys are empty, `RESEND_API_KEY` is
+  empty, or `NEXT_PUBLIC_DEMO_MODE` is not `false`, **stop** and tell the human
+  which `user_task.md` step is still open.
+- **No simulated Stellar.** The API must never return fake transaction hashes.
+  Missing `HEIRLOOM_CONTRACT_ID` is a 503, not a demo.
+- **No demo data in production.** `NEXT_PUBLIC_DEMO_MODE=false` is mandatory.
+- **Do not re-enable email/password auth.** It is preserved-but-disabled.
+- **Do not add a platform signing key.** Heirloome is self-custodial.
+- **Do not `git push`.** The human reviews and pushes.
+- **Do not amend** unless the human asked. New commits only.
 
 ---
 
 ## Step 1: Validate environment files
 
-Check that the required environment variables are set.
+Read `heirloom-api/.env` and `heirloom-web/.env.local` (never print secret values).
 
-### `heirloom-api/.env`
+### `heirloom-api/.env` — all required for live
 
-Required (production-honest):
-- `DATABASE_URL`
-- `JWT_SECRET` (at least 32 characters)
-- `ENCRYPTION_KEY` (64 hex characters)
-- `REDIS_URL`
+| Variable | Rule |
+|---|---|
+| `DATABASE_URL` | present |
+| `JWT_SECRET` | ≥ 32 chars, not `change-me` |
+| `ENCRYPTION_KEY` | 64 hex chars, not all zeros |
+| `REDIS_URL` | present |
+| `HEIRLOOM_CONTRACT_ID` | starts with `C`, not empty |
+| `STELLAR_NETWORK` | `testnet` or `mainnet` |
+| `STELLAR_RPC_URL` | present |
+| `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` | all present |
+| `RESEND_API_KEY` | present (`re_…`) |
+| `EMAIL_FROM` | present |
+| `WEB_ORIGIN` | present |
 
-Optional (presence determines simulated vs real Stellar):
-- `STELLAR_SECRET_KEY` — if absent, StellarService runs in **simulated mode**
-  (deterministic fake transaction hashes). Mark this clearly if it is absent.
-- `HEIRLOOM_CONTRACT_ID` — same: if absent, the API stays in simulated mode.
-
-If `JWT_SECRET` or `ENCRYPTION_KEY` are missing or look like placeholders
-(`change-me`, `0000...`), stop and tell the user to run step 6 of `user_task.md`.
+`STELLAR_SECRET_KEY` must **not** be required. If it is set, warn: the API does
+not read it; secrets for signing belong in Freighter / the Stellar CLI identity
+only.
 
 ### `heirloom-web/.env.local`
 
-Required:
-- `NEXT_PUBLIC_API_URL` (default `http://localhost:4000/api`)
-- `NEXT_PUBLIC_STELLAR_NETWORK` (testnet or mainnet)
-- `NEXT_PUBLIC_RPC_URL` (Stellar Soroban RPC)
-- `NEXT_PUBLIC_DEMO_MODE` — must be `false` for production. If it is `true` or
-  missing, warn the user: when true, API errors fall back to fabricated "warm"
-  demo data instead of genuinely empty values.
+| Variable | Rule |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | present |
+| `NEXT_PUBLIC_STELLAR_NETWORK` | present |
+| `NEXT_PUBLIC_RPC_URL` | present |
+| `NEXT_PUBLIC_DEMO_MODE` | **exactly** `false` |
 
-If any required var is missing, list what is missing and stop.
+If anything fails this table, list the gaps and **stop**.
 
 ---
 
-## Step 2: Install dependencies (web + API)
+## Step 2: Install dependencies
 
-Both use `pnpm` via corepack.
-
-```bash
-cd ~/heirlooms/heirloom-web
+```powershell
+cd heirloom-web
 corepack pnpm install
 
-cd ~/heirlooms/heirloom-api
+cd ../heirloom-api
 corepack pnpm install
 ```
 
-The API's `postinstall` script runs `prisma generate` automatically. If it
-fails, report the error and stop.
+API `postinstall` runs `prisma generate`. If it fails, stop.
 
 ---
 
 ## Step 3: Database migration
 
-The `heirloom-api` Prisma schema has no committed migrations directory yet, so
-the first run must use `migrate dev` (creates the migration + applies it).
-Subsequent runs can use `migrate deploy` (applies existing migrations only).
+Migrations already exist under `heirloom-api/prisma/migrations/`. Apply them:
 
-```bash
-cd ~/heirlooms/heirloom-api
-# First run (no prisma/migrations/ directory):
-corepack pnpm run prisma:migrate
-# The script will prompt for a migration name; suggest "init" or let it default.
-
-# OR, if migrations/ already exists:
+```powershell
+cd heirloom-api
 corepack pnpm run prisma:deploy
 ```
 
-If Postgres is unreachable or the migration fails, report the error and stop.
+If Postgres is down, stop and tell the human to run `docker compose up -d`
+inside `heirloom-api` (`user_task.md` step 3).
 
 ---
 
-## Step 4: Contract build (Rust, optional)
+## Step 4: Contract build (verify the wasm still compiles)
 
-If `cargo` and `stellar` CLI are installed, build and optionally deploy the
-Soroban `legacy` contract. If Rust is absent, skip this step — the human can
-deploy later or run in simulated mode.
-
-```bash
-cd ~/heirlooms/heirloom-contracts
-cargo --version && stellar --version
-# If both succeed:
+```powershell
+cd heirloom-contracts
+cargo test
 stellar contract build
-# Produces target/wasm32-unknown-unknown/release/legacy.wasm
-
-# Deploying requires STELLAR_SECRET_KEY; only attempt if the user confirmed
-# they want to deploy now. Otherwise, just build and stop here.
 ```
 
-If Rust is absent, log:
+Do **not** redeploy unless the human asked. The live contract id is already in
+`.env`. Building confirms the toolchain matches what was deployed.
 
-```
-Rust + stellar CLI not found; skipping contract build. The API will run in
-simulated mode (fake tx hashes) unless STELLAR_SECRET_KEY and
-HEIRLOOM_CONTRACT_ID are set. This is expected and fully runnable — just not
-hitting the real Stellar network.
-```
+If Rust / `stellar` is missing, stop — Drips requires a real contract
+(`user_task.md` step 1 and 4).
 
 ---
 
-## Step 5: Type-check and lint (web + API)
+## Step 5: Type-check, lint, tests
 
-Run `tsc --noEmit` and lint in both repos. Report every error; do not proceed to
-build if types fail.
-
-```bash
-cd ~/heirlooms/heirloom-web
+```powershell
+cd heirloom-web
 npx tsc --noEmit
 corepack pnpm run lint
 
-cd ~/heirlooms/heirloom-api
+cd ../heirloom-api
 npx tsc --noEmit
 corepack pnpm run lint
+corepack pnpm test
 ```
 
-If types or lint fail, report the exact errors. Do not continue to step 6.
+If types, lint, or tests fail: **fix the code**, re-run the failing command,
+then continue. Do not ignore failures. Do not weaken tests to go green.
 
 ---
 
-## Step 6: Build (web + API)
+## Step 6: Production builds
 
-```bash
-cd ~/heirlooms/heirloom-web
+```powershell
+cd heirloom-web
 corepack pnpm run build
 
-cd ~/heirlooms/heirloom-api
+cd ../heirloom-api
 corepack pnpm run build
 ```
 
-If the web build fails, report the errors. If the API build fails, report them.
-Both must succeed for production deployment.
+Both must succeed.
 
 ---
 
-## Step 7: Reality check — what is mocked?
+## Step 7: Live-stack audit (not optional)
 
-Audit the running state and report honestly:
+Confirm all of the following in **code + env**, and report each as pass/fail:
 
-- **NEXT_PUBLIC_DEMO_MODE**: is it `false`? If `true`, warn: "Demo mode is ON.
-  API errors will fall back to fabricated data instead of genuinely empty
-  values. Set `NEXT_PUBLIC_DEMO_MODE=false` in `.env.local` for production."
+1. **Demo mode off** — `NEXT_PUBLIC_DEMO_MODE=false`.
+2. **No fake Stellar** — `StellarService` throws 503 when unconfigured; grep
+   must not find deterministic fake tx hashes in `heirloom-api/src`.
+3. **No platform key** — API does not read `STELLAR_SECRET_KEY`.
+4. **R2 storage** — `StorageService` is used for archive + message media.
+5. **Resend** — `NotificationsService` sends via Resend when the key is set.
+6. **Capsule is live** — `GET /api/claim/:token` plus Freighter claim on
+   `/claim/[token]` (not a dead button).
+7. **Check-in cascade** — scheduler sends upcoming reminder → two missed
+   reminders → then guardians, not an instant “they’re gone.”
+8. **Journey endpoint** — `GET /api/legacy/journey` exists and is what the
+   dashboard timeline calls.
+9. **Web ↔ API mapping** — messages send `content` + `{ kind, value }` release
+   rules; documents send Prisma enums; assets send `label` + string `amount`.
 
-- **Stellar simulation**: are `STELLAR_SECRET_KEY` and `HEIRLOOM_CONTRACT_ID`
-  both set in `heirloom-api/.env`? If either is absent, report: "StellarService
-  is running in SIMULATED mode. Legacy plans, guardian approvals, and
-  beneficiary claims return deterministic fake transaction hashes. Nothing hits
-  the real Stellar network. To use the real network, deploy the Soroban contract
-  (step 5 of `user_task.md`) and fill both env vars."
-
-- **Notifications**: report: "Notifications are console-log only
-  (`src/notifications/notifications.service.ts`). Check-in reminders, guardian
-  alerts, and beneficiary notifications are logged to the API console with the
-  calm product voice, but no real emails/SMS are sent. A real provider (Resend,
-  Postmark, SES) swaps in behind the same method signatures when you are ready."
+If any item fails, fix it in this run, then re-check.
 
 ---
 
-## Step 8: Commit (do NOT push)
+## Step 8: Boot smoke (local)
 
-Stage and commit all changes in `heirloom-web` with a descriptive message. The
-user reviews and pushes manually.
+Start both apps (separate terminals / background):
 
-```bash
-cd ~/heirlooms/heirloom-web
-git add .
-git commit -m "feat: Freighter-only auth, demo-mode gating, reality-based docs
+```powershell
+cd heirloom-api
+corepack pnpm run start:dev
 
-- Freighter wallet login as the only way into the dashboard (cryptographic
-  challenge/signature via ed25519); email/password auth preserved but disabled
-  with AI-removal warning banners.
-- Demo-mode gating: NEXT_PUBLIC_DEMO_MODE=false (production default) ensures
-  API errors fall back to genuinely empty data, never fabricated warm data.
-- Rewrote user_task.md and latter.md to reflect the actual architecture
-  (server-side AES-256 encryption, console-log notifications, no Pinata/Resend/
-  Twilio).
-- Added @stellar/freighter-api dependency, AuthGuard, real wallet services.
-
-Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
+cd heirloom-web
+corepack pnpm run dev
 ```
 
-If `heirloom-api` or `heirloom-contracts` have uncommitted changes, commit them
-too with co-authorship trailers.
+- `GET http://localhost:4000/api/health` must be 200.
+- API logs must show Stellar connected (not “NOT configured”), R2 connected,
+  Resend connected. If any log says NOT configured, stop — the matching
+  `user_task.md` step is incomplete.
+- Open `http://localhost:3000` — login is Freighter, not email.
 
-Do **not** run `git push`. The user will review the commits and push when ready.
+Do not click through a full on-chain demo yourself unless the human is present
+(Freighter prompts need a person). Report that the owner must: connect Freighter
+→ add beneficiaries (allocations = 100%) and guardians with wallets → protect
+assets → Protect + Fund on the assets page → check in.
 
 ---
 
-## Step 9: Final report
+## Step 9: Commit (do NOT push)
 
-Summarize what was done and what the user must do next:
+If this run changed files:
+
+```powershell
+# In each dirty repo, separately:
+git status
+git diff
+git log -5 --oneline
+git add <the files you changed>
+git commit -m "..."
+```
+
+Commit message: one or two sentences on **why** (live stack, no mocks). Do not
+copy an old message about simulated mode. Do not commit `.env` / `.env.local`.
+
+If there is nothing to commit, say so.
+
+**Never `git push`.**
+
+---
+
+## Step 10: Final report
+
+Fill this in honestly:
 
 ```
+✅ Env validated (contract id, R2, Resend, DEMO_MODE=false).
 ✅ Dependencies installed (web + API).
-✅ Database migrated (Prisma).
-[✅ or ⚠️] Contract built [or skipped — Rust not found].
-✅ Type-check and lint passed (web + API).
-✅ Production builds succeeded (web + API).
-✅ Changes committed in heirloom-web (and heirloom-api/contracts if modified).
+✅ Database migrated (prisma:deploy).
+✅ Contract tests + wasm build.
+✅ Type-check, lint, tests (web + API).
+✅ Production builds.
+✅ Health check 200. Logs: Stellar / R2 / Resend connected.
+✅ Changes committed (or: no local changes).
 
-🔍 Reality check:
-   • NEXT_PUBLIC_DEMO_MODE: [false ✅ | true ⚠️ set to false for production]
-   • Stellar: [REAL network ✅ | SIMULATED ⚠️ (no STELLAR_SECRET_KEY or CONTRACT_ID)]
-   • Notifications: console-log only (optional future: wire a real provider)
+🔍 Live check:
+   • NEXT_PUBLIC_DEMO_MODE=false
+   • HEIRLOOM_CONTRACT_ID set (real C… id)
+   • R2 configured
+   • Resend configured
+   • No STELLAR_SECRET_KEY used by the API
+   • No fake transaction hashes
 
-📋 Next steps for you:
-   1. Review the commits:
-        cd ~/heirlooms/heirloom-web && git log --oneline -5
-        cd ~/heirlooms/heirloom-api && git log --oneline -5
-        cd ~/heirlooms/heirloom-contracts && git log --oneline -5
-   2. Inspect the diffs vs origin/main:
-        git diff origin/main
-   3. When satisfied, push:
-        git push origin main
-   4. ROTATE THE GITHUB TOKEN you pasted earlier — it is compromised. Generate
-      a fresh one (or use SSH) before your next push.
-   5. Start the API:
-        cd ~/heirlooms/heirloom-api && corepack pnpm run start:dev
-   6. Start the web app:
-        cd ~/heirlooms/heirloom-web && corepack pnpm run dev
-   7. Open http://localhost:3000, connect your Freighter wallet, and sign in.
-
-🎉 Heirloom is production-ready (modulo optional notifications and real Stellar
-   if you want them). No mocks, no stale docs, no loose ends.
+📋 Your next steps:
+   1. Review commits (git log / git diff origin/main) in all three repos.
+   2. Push when satisfied: git push origin main (each repo).
+   3. Open http://localhost:3000, connect Freighter, walk the live flow:
+      beneficiaries → guardians → assets → Protect + Fund → I'm Here.
+   4. Use a second Freighter account as a guardian to approve.
+   5. After verification, open the emailed /claim/<token> link as a beneficiary
+      and claim with that wallet.
 ```
+
+If any box is not true, do not say the product is Drips-ready.
 
 ---
 
-## Notes for the AI running this script
+## Notes for the agent
 
-- **Honest reporting**: If a step fails, say exactly what failed and stop. Do
-  not proceed to later steps or fabricate success.
-- **No assumptions**: If an env var looks like a placeholder, stop and ask. Do
-  not guess or auto-generate secrets.
-- **Manual push**: Never run `git push`. The user reviews commits first.
-- **Simulated mode is not a bug**: If `STELLAR_SECRET_KEY`/`CONTRACT_ID` are
-  absent, StellarService deliberately runs in simulated mode (returning fake tx
-  hashes). Report this as expected behavior, not an error, and note that the app
-  is fully runnable this way — just not hitting the real network.
+- Prefer fixing code over documenting workarounds.
+- `user_task.md` is the only place humans create cloud accounts and secrets.
+- Simulated Stellar, console-only email, and Postgres-as-file-storage are
+  **obsolete**. The live stack is Freighter + Soroban + R2 + Resend.
+- Email/password routes stay commented with their “do not delete” banners.

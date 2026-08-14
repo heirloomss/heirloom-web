@@ -30,11 +30,11 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Heirloom — Your legacy, thoughtfully prepared.',
-    template: '%s · Heirloom',
+    default: 'Heirloome — Your legacy, thoughtfully prepared.',
+    template: '%s · Heirloome',
   },
   description:
-    'Heirloom is a digital legacy platform. Preserve what matters. Protect those who matter — beneficiaries, documents, memories, and the certainty that love deserves a plan that lasts.',
+    'Heirloome is a digital legacy platform. Preserve what matters. Protect those who matter — beneficiaries, documents, memories, and the certainty that love deserves a plan that lasts.',
   icons: {
     icon: '/heirloom-logo.svg',
     apple: '/heirloom-logo.svg',

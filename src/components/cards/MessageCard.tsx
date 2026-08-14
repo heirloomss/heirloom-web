@@ -6,7 +6,6 @@ import { Camera, Feather, Mic, Video, type LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { stack } from '@/lib/motion';
 import { formatDate } from '@/utils/format';
-import { beneficiaryName } from '@/lib/demo-data';
 import type { Message, MessageType } from '@/types';
 
 const ICONS: Record<MessageType, LucideIcon> = {
@@ -19,7 +18,7 @@ const ICONS: Record<MessageType, LucideIcon> = {
 /** A message in the Memory Collection — warm, personal, never clinical. */
 export function MessageCard({ message }: { message: Message }) {
   const Icon = ICONS[message.type];
-  const recipient = beneficiaryName(message.recipientId);
+  const recipient = message.recipientName;
   return (
     <motion.li variants={stack} className="list-none">
       <Link

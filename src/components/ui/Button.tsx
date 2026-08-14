@@ -19,7 +19,7 @@ const variants: Record<Variant, string> = {
     'border border-ink/15 bg-cotton/80 text-ink shadow-paper-1 hover:border-ink/25 hover:bg-cotton',
   ghost: 'text-ink-soft hover:bg-linen/60 hover:text-ink',
   danger: 'border border-error/30 bg-[#F9EFEE] text-error hover:bg-[#F4E4E3]',
-  stellar: 'border border-indigo/30 bg-indigo-wash/50 text-indigo hover:bg-indigo hover:text-cotton shadow-paper-1',
+  stellar: 'bg-moss text-cotton shadow-paper-2 hover:bg-moss-deep',
 };
 
 const sizes: Record<Size, string> = {

@@ -1,4 +1,16 @@
 import { apiClient } from './api-client';
+import {
+  mapActivity,
+  mapAsset,
+  mapCheckIn,
+  mapDocument,
+  mapGuardian,
+  mapMessage,
+  mapUser,
+  emptyWallet,
+  messageTypeToApi,
+  releaseRuleToApi,
+} from '@/lib/mappers';
 import type {
   ActivityEvent,
   ArchiveDocument,
@@ -44,24 +56,38 @@ export interface CheckInStatusResponse {
  * every page renders completely even when the API is not running.
  */
 export const endpoints = {
-  me: () => apiClient.get<User>('/users/me'),
+  me: async () => mapUser((await apiClient.get<Record<string, unknown>>('/users/me')) as Record<string, unknown>),
   dashboardSummary: () => apiClient.get<DashboardSummary>('/users/summary'),
 
   beneficiaries: {
     list: () => apiClient.get<Beneficiary[]>('/beneficiaries'),
     get: (id: string) => apiClient.get<Beneficiary>(`/beneficiaries/${id}`),
     create: (data: Partial<Beneficiary>) =>
-      apiClient.post<Beneficiary>('/beneficiaries', data),
+      apiClient.post<Beneficiary>('/beneficiaries', {
+        ...data,
+        walletAddress: emptyWallet(data.walletAddress ?? undefined),
+      }),
     update: (id: string, data: Partial<Beneficiary>) =>
-      apiClient.patch<Beneficiary>(`/beneficiaries/${id}`, data),
+      apiClient.patch<Beneficiary>(`/beneficiaries/${id}`, {
+        ...data,
+        walletAddress: emptyWallet(data.walletAddress ?? undefined),
+      }),
     remove: (id: string) => apiClient.delete<void>(`/beneficiaries/${id}`),
   },
 
   guardians: {
-    list: () => apiClient.get<Guardian[]>('/guardians'),
-    invite: (data: Partial<Guardian>) => apiClient.post<Guardian>('/guardians', data),
+    list: async () =>
+      ((await apiClient.get<Record<string, unknown>[]>('/guardians')) ?? []).map(mapGuardian),
+    invite: (data: Partial<Guardian>) =>
+      apiClient.post<Guardian>('/guardians', {
+        ...data,
+        walletAddress: emptyWallet(data.walletAddress ?? undefined),
+      }),
     update: (id: string, data: Partial<Guardian>) =>
-      apiClient.patch<Guardian>(`/guardians/${id}`, data),
+      apiClient.patch<Guardian>(`/guardians/${id}`, {
+        ...data,
+        walletAddress: emptyWallet(data.walletAddress ?? undefined),
+      }),
     /**
      * Build the unsigned approve_guardian transaction for the guardian to sign
      * in their own Freighter wallet. `guardianAddress` is optional — the API
@@ -76,10 +102,10 @@ export const endpoints = {
   },
 
   assets: {
-    list: () => apiClient.get<Asset[]>('/assets'),
-    get: (id: string) => apiClient.get<Asset>(`/assets/${id}`),
+    list: async () => ((await apiClient.get<Record<string, unknown>[]>('/assets')) ?? []).map(mapAsset),
+    get: async (id: string) => mapAsset(await apiClient.get<Record<string, unknown>>(`/assets/${id}`)),
     protect: (data: { label: string; assetCode: string; amount: number; recipientId?: string }) =>
-      apiClient.post<Asset>('/assets', data),
+      apiClient.post<Asset>('/assets', { ...data, amount: String(data.amount) }),
     update: (id: string, data: Partial<Asset>) =>
       apiClient.patch<Asset>(`/assets/${id}`, data),
     allocate: (id: string, recipientId: string) =>
@@ -88,29 +114,47 @@ export const endpoints = {
   },
 
   documents: {
-    list: () => apiClient.get<ArchiveDocument[]>('/archive'),
+    list: async () =>
+      ((await apiClient.get<Record<string, unknown>[]>('/archive')) ?? []).map(mapDocument),
     /** Multipart upload — handled by a dedicated client helper. */
     remove: (id: string) => apiClient.delete<void>(`/archive/${id}`),
     downloadUrl: (id: string) => `${process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ?? 'http://localhost:4000/api'}/archive/${id}/download`,
   },
 
   messages: {
-    list: () => apiClient.get<Message[]>('/messages'),
-    get: (id: string) => apiClient.get<Message>(`/messages/${id}`),
-    create: (data: Partial<Message>) => apiClient.post<Message>('/messages', data),
+    list: async () =>
+      ((await apiClient.get<Record<string, unknown>[]>('/messages')) ?? []).map(mapMessage),
+    get: async (id: string) => mapMessage(await apiClient.get<Record<string, unknown>>(`/messages/${id}`)),
+    create: (data: Partial<Message>) =>
+      apiClient.post<Message>('/messages', {
+        title: data.title,
+        type: messageTypeToApi((data.type as Message['type']) ?? 'Letter'),
+        recipientId: data.recipientId || undefined,
+        content: data.body,
+        releaseRule: releaseRuleToApi((data.releaseRule as Message['releaseRule']) ?? 'Immediately'),
+      }),
     update: (id: string, data: Partial<Message>) =>
-      apiClient.patch<Message>(`/messages/${id}`, data),
+      apiClient.patch<Message>(`/messages/${id}`, {
+        title: data.title,
+        recipientId: data.recipientId,
+        content: data.body,
+        releaseRule: data.releaseRule
+          ? releaseRuleToApi(data.releaseRule as Message['releaseRule'])
+          : undefined,
+      }),
     remove: (id: string) => apiClient.delete<void>(`/messages/${id}`),
   },
 
   activity: {
-    list: () => apiClient.get<ActivityEvent[]>('/activity'),
-    timeline: () => apiClient.get<ActivityEvent[]>('/activity'),
+    list: async () =>
+      ((await apiClient.get<Record<string, unknown>[]>('/activity')) ?? []).map(mapActivity),
+    timeline: async () =>
+      ((await apiClient.get<Record<string, unknown>[]>('/activity')) ?? []).map(mapActivity),
   },
 
   /** Life Check-In — "We're checking in. Everything okay?" → "I'm Here". */
   checkIn: {
-    state: () => apiClient.get<CheckInState>('/activity/checkin'),
+    state: async () => mapCheckIn(await apiClient.get<Record<string, unknown>>('/activity/checkin')),
     confirm: () => apiClient.post<CheckInStatusResponse>('/activity/checkin'),
     /** Configure cadence (30/90/180 days). */
     setInterval: (intervalDays: number) =>
@@ -150,7 +194,7 @@ export const endpoints = {
     submit: (data: SubmitLegacyPayload) => apiClient.post<SubmitResult>('/legacy/submit', data),
     claims: () => apiClient.get<LegacyClaimsResponse>('/legacy/claims'),
     /** The Legacy Journey timeline. */
-    journey: () => apiClient.get<JourneyEvent[]>('/legacy'),
+    journey: () => apiClient.get<JourneyEvent[]>('/legacy/journey'),
   },
 
   /**

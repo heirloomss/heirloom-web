@@ -57,6 +57,7 @@ export interface Beneficiary {
   walletAddress: string | null;
   allocationPercentage: number;
   verified: boolean;
+  dateOfBirth?: string | null;
   createdAt: ISODateString;
 }
 
@@ -91,9 +92,10 @@ export interface Asset {
   label: string;
   assetCode: AssetCode;
   amount: number;
-  /** Approximate value for calm display totals. */
+  /** Approximate value for calm display totals. Stablecoins only; never invented. */
   usdValue: number;
   recipientId: string | null;
+  recipientName: string | null;
   status: AssetStatus;
   createdAt: ISODateString;
 }
@@ -106,6 +108,7 @@ export type DocumentCategory =
   | 'Marriage Certificate'
   | 'Business'
   | 'Tax'
+  | 'Password Hint'
   | 'Will'
   | 'Other';
 
@@ -117,6 +120,7 @@ export const DOCUMENT_CATEGORIES: DocumentCategory[] = [
   'Marriage Certificate',
   'Business',
   'Tax',
+  'Password Hint',
   'Will',
   'Other',
 ];
@@ -160,6 +164,8 @@ export interface Message {
   /** Letter body / transcript text. */
   body?: string;
   durationLabel?: string;
+  recipientName?: string | null;
+  hasMedia?: boolean;
   createdAt: ISODateString;
 }
 
@@ -243,7 +249,7 @@ export interface LegacyCapsule {
     }
   >;
   documents: Array<Pick<ArchiveDocument, 'id' | 'title' | 'category'>>;
-  messages: Array<Pick<Message, 'id' | 'type' | 'title' | 'body' | 'durationLabel'>>;
+  messages: Array<Pick<Message, 'id' | 'type' | 'title' | 'body' | 'durationLabel'> & { hasMedia?: boolean }>;
 }
 
 // ---------------------------------------------------------------------------
@@ -258,7 +264,9 @@ export interface LegacyCapsule {
 /** On-chain plan status, mirroring the contract's LegacyStatus. */
 export type LegacyPlanStatus =
   | 'DRAFT'
+  | 'PROTECTED'
   | 'FUNDED'
+  | 'VERIFYING'
   | 'VERIFIED'
   | 'RELEASED'
   | 'CANCELLED';

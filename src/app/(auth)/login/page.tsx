@@ -127,7 +127,7 @@ export default function LoginPage() {
 
       <div className="mt-8">
         <Button
-          variant="stellar"
+          variant="primary"
           size="lg"
           className="w-full font-semibold"
           onClick={handleFreighterLogin}
@@ -148,7 +148,7 @@ export default function LoginPage() {
       </div>
 
       <p className="mt-8 text-center text-sm text-ink-soft">
-        New to Heirloom?{' '}
+        New to Heirloome?{' '}
         <Link href="/register" className="font-medium text-moss-deep underline-offset-4 hover:underline">
           Begin your legacy
         </Link>

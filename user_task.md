@@ -1,207 +1,155 @@
-# Heirloom — Human Setup Tasks (`user_task.md`)
+# Heirloome — Human Setup Tasks (`user_task.md`)
 
-Everything **you** (a human) must do by hand to take Heirloom from a fresh clone
-to a real, production-honest running system. None of it can be automated safely
-— it involves secrets, an external wallet, funding a testnet account, and
-provisioning services. Once these are done, an AI can run `latter.md` to install,
-migrate, verify, and build the rest.
+Everything **you** (a human) must do by hand so Heirloome can run as a live
+product — no simulated chain, no fabricated demo data, no placeholder email.
+None of this can be automated safely: it involves wallets, secrets, cloud
+accounts, and funding. When this checklist is done, tell an agent to run
+`latter.md`.
 
 This project is three repositories side by side:
 
 ```
-heirlooms/
-  heirloom-web/        Next.js 15 front end (this repo)
+heirloom/
+  heirloom-web/        Next.js 15 front end (this file lives here)
   heirloom-api/        NestJS 11 + Prisma + Postgres + Redis + Stellar SDK
   heirloom-contracts/  Soroban `legacy` smart contract (Rust)
 ```
 
-> **Reality check.** Heirloom does **not** use Pinata/IPFS, Resend, SendGrid, or
-> Twilio. Documents are encrypted **server-side** with AES-256-GCM in the API and
-> stored in Postgres. Notifications are **console-log only** today (see step 9) —
-> a real email/SMS provider is a future swap, not a launch requirement. Any older
-> doc mentioning those services was aspirational and has been removed.
+GitHub org: `heirloomss`
+(`https://github.com/heirloomss/heirloom-web` · `heirloom-api` · `heirloom-contracts`).
 
 ---
 
-## 0. Security first — rotate the leaked GitHub token
+## 0. Security
 
-A GitHub personal access token was pasted into a chat during development. Treat
-it as **compromised**.
-
-- [ ] Go to **GitHub → Settings → Developer settings → Personal access tokens**.
-- [ ] **Revoke** the exposed token immediately.
-- [ ] Generate a **fresh** token (or, better, use SSH keys / the `gh` CLI login).
-- [ ] Never paste a token into a prompt again — use `git push` with a credential
-      helper or SSH.
+- [ ] If a GitHub personal access token was ever pasted into a chat, **revoke it**
+      at GitHub → Settings → Developer settings → Personal access tokens.
+- [ ] Prefer SSH or `gh auth login` for git. Never paste tokens into prompts.
 
 ---
 
-## 1. Prerequisites
+## 1. Install tools (once)
 
-Install these once on your machine.
+- [ ] **Node.js 20+** — https://nodejs.org (LTS)
+- [ ] **pnpm** via Corepack: `corepack enable`
+- [ ] **Docker Desktop** — Postgres + Redis for local runs
+- [ ] **Freighter** browser extension — https://www.freighter.app
+- [ ] **Rust** + wasm target + **Stellar CLI** (required — the contract must be live):
 
-- [ ] **Node.js 20+** — https://nodejs.org (LTS).
-- [ ] **pnpm** via Corepack (ships with Node): `corepack enable`
-- [ ] **Docker + Docker Compose** — for Postgres and Redis. https://docs.docker.com
-- [ ] **Freighter wallet** browser extension — https://www.freighter.app
-- [ ] *(only if you will build/deploy the contract yourself)* **Rust** +
-      `wasm32-unknown-unknown` target and the **Stellar CLI**:
-      ```bash
-      curl https://sh.rustup.rs -sSf | sh
-      rustup target add wasm32-unknown-unknown
-      cargo install --locked stellar-cli
-      ```
-
----
-
-## 2. Clone the three repositories
-
-The web app needs the API and contracts side-by-side.
-
-```bash
-mkdir ~/heirlooms && cd ~/heirlooms
-git clone https://github.com/YOUR_ORG/heirloom-web.git
-git clone https://github.com/YOUR_ORG/heirloom-api.git
-git clone https://github.com/YOUR_ORG/heirloom-contracts.git
+```powershell
+# Windows (PowerShell). Use rustup from https://rustup.rs
+rustup target add wasm32-unknown-unknown
+cargo install --locked stellar-cli
 ```
 
-Replace `YOUR_ORG` with the actual GitHub org/user.
+---
+
+## 2. Freighter on Stellar testnet
+
+Heirloome’s only sign-in is a Freighter signature. Email/password exists in the
+code but is disabled on purpose — do not re-enable it for Drips.
+
+- [ ] Install Freighter and create (or import) a Stellar account.
+- [ ] Switch Freighter to **Testnet**.
+- [ ] Fund it with Friendbot: https://laboratory.stellar.org/#account-creator?network=test
+      Paste your public key (`G…`) and request XLM.
+- [ ] Confirm a balance on https://stellar.expert/explorer/testnet
+- [ ] You will also need **separate testnet accounts** for at least:
+      - 2–3 guardians (they must sign approvals)
+      - 1–2 beneficiaries (they must claim)
+      Fund those too. Each person who signs on-chain needs their own funded `G…` account.
 
 ---
 
-## 3. Install Freighter and fund a testnet account
+## 3. Start Postgres and Redis
 
-Heirloom's **only** way in is a Freighter wallet signature. There is no
-email/password sign-in anymore (that code is preserved but disabled).
+The API already ships Compose. From `heirloom-api`:
 
-- [ ] Install the **Freighter browser extension** from https://www.freighter.app
-- [ ] Create or import a Stellar account in Freighter.
-- [ ] Fund it on testnet via the **Stellar Laboratory Friendbot**:
-      https://laboratory.stellar.org/#account-creator?network=test
-      Paste your public key (starts with `G...`) and request XLM.
-- [ ] Confirm your account has a balance by checking it on
-      https://stellar.expert/explorer/testnet
-
-You will sign in to Heirloom by connecting this wallet. Your signature proves
-ownership — no password needed.
-
----
-
-## 4. Provision Postgres and Redis (Docker Compose)
-
-The API uses **Postgres** (Prisma ORM) and **Redis** (BullMQ scheduler for Life
-Check-Ins).
-
-Create `heirlooms/docker-compose.yml`:
-
-```yaml
-version: '3.9'
-services:
-  postgres:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: heirloom
-      POSTGRES_PASSWORD: heirloom
-      POSTGRES_DB: heirloom
-    ports:
-      - '5432:5432'
-    volumes:
-      - heirloom_pgdata:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    ports:
-      - '6379:6379'
-
-volumes:
-  heirloom_pgdata:
-```
-
-Start them:
-
-```bash
-cd ~/heirlooms
+```powershell
+cd heirloom-api
 docker compose up -d
+docker compose ps
 ```
 
-Confirm they are running: `docker compose ps`
+You should see `heirloom-postgres` on `5432` and `heirloom-redis` on `6379`.
 
 ---
 
-## 5. Deploy the Soroban `legacy` contract (optional, or use simulated mode)
+## 4. Deploy the Soroban `legacy` contract (required)
 
-The `heirloom-contracts/contracts/legacy` Rust contract handles on-chain legacy
-plans (guardian threshold, beneficiary claims). The **API can run without it** —
-`StellarService` has a "simulated mode" that returns deterministic fake
-transaction hashes when `STELLAR_SECRET_KEY` and `HEIRLOOM_CONTRACT_ID` are
-absent. For **production-honest behavior** (real on-chain state), deploy the
-contract.
+There is **no simulated mode**. If `HEIRLOOM_CONTRACT_ID` is empty, protecting
+a legacy returns HTTP 503. Deploy for real:
 
-### If you have Rust + `stellar` CLI installed:
+```powershell
+cd heirloom-contracts
+# One-time identity (stores a secret locally in the Stellar CLI, not in the API)
+./scripts/init_identity.sh
+# On Windows Git Bash / WSL. If you only have PowerShell, use WSL for these scripts.
 
-```bash
-cd ~/heirlooms/heirloom-contracts
-stellar contract build
-stellar contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/legacy.wasm \
-  --network testnet \
-  --source YOUR_FREIGHTER_SECRET_KEY
+NETWORK=testnet SOURCE=heirloom-deployer ./scripts/deploy.sh
 ```
 
-Save the returned contract ID (starts with `C...`).
-
-### If you skip this step:
-
-The API will log:
-
-```
-StellarService running in SIMULATED mode (no STELLAR_SECRET_KEY / HEIRLOOM_CONTRACT_ID).
-Returning deterministic fake transaction hashes.
-```
-
-The app stays fully runnable — legacy plans, guardian approvals, and beneficiary
-claims all return fake hashes and the UI reflects them, but nothing hits the
-real Stellar network. **Mark this clearly** if you demo the app to real users.
+- [ ] Copy the printed contract id (`C…`).
+- [ ] You will paste it into `heirloom-api/.env` as `HEIRLOOM_CONTRACT_ID`.
+- [ ] The **API never holds a signing key**. Owners, guardians, and beneficiaries
+      sign in Freighter. Do not put a Freighter secret into the API `.env`.
 
 ---
 
-## 6. Generate secrets
+## 5. Cloudflare R2 (encrypted archive)
 
-### JWT signing secret
+Documents, voice, video, and photos are encrypted with AES-256-GCM in the API,
+then stored in R2. Uploads return 503 until this is set.
 
-The API uses this to sign access tokens.
+- [ ] Create a Cloudflare account — https://dash.cloudflare.com
+- [ ] R2 → Create bucket (e.g. `heirloom-archive`)
+- [ ] Manage R2 API Tokens → Create API token with Object Read & Write on that bucket
+- [ ] Copy: Account ID, Access Key ID, Secret Access Key, bucket name
+- [ ] Endpoint is `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` (leave
+      `R2_ENDPOINT` blank in `.env` to use that default)
 
-```bash
+---
+
+## 6. Resend (real email)
+
+Guardian invites, Life Check-In reminders, missed-check-in cascade, and the
+beneficiary’s private capsule link (`/claim/<token>`) go out through Resend.
+
+- [ ] Create an account — https://resend.com
+- [ ] Create an API key
+- [ ] For Drips/testnet you may send from `Heirloome <onboarding@resend.dev>`
+      (Resend’s test sender — only delivers to **your** Resend account email)
+- [ ] For a public demo, verify your own domain in Resend and set `EMAIL_FROM`
+      to something like `Heirloome <hello@yourdomain.com>`
+
+Without `RESEND_API_KEY`, emails are skipped and only logged. That is not
+Drips-ready — fill it in.
+
+---
+
+## 7. Generate secrets
+
+```powershell
+# JWT signing secret
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-```
 
-Copy the output.
-
-### AES-256 encryption key
-
-The Digital Archive encrypts documents **server-side** (not in the browser, not
-on IPFS) with AES-256-GCM before storing them in Postgres.
-
-```bash
+# AES-256-GCM key (64 hex chars)
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-Copy the 64-character hex string.
+- [ ] Copy both. You will paste them into `heirloom-api/.env`.
+- [ ] Never commit `.env` files.
 
 ---
 
-## 7. Fill `heirloom-api/.env`
+## 8. Fill `heirloom-api/.env`
 
-Copy the example and edit it:
-
-```bash
-cd ~/heirlooms/heirloom-api
-cp .env.example .env
+```powershell
+cd heirloom-api
+copy .env.example .env
 ```
 
-Edit `.env`:
+Edit `.env` so **every** value is real:
 
 ```env
 PORT=4000
@@ -209,84 +157,94 @@ WEB_ORIGIN=http://localhost:3000
 
 DATABASE_URL=postgresql://heirloom:heirloom@localhost:5432/heirloom?schema=public
 
-JWT_SECRET=<paste the base64 secret from step 6>
+JWT_SECRET=<base64 from step 7>
 JWT_EXPIRES_IN=7d
 
-ENCRYPTION_KEY=<paste the 64-hex key from step 6>
+ENCRYPTION_KEY=<64-hex from step 7>
 
 REDIS_URL=redis://localhost:6379
 
+# 168 = 7 days between missed-check-in reminders (production).
+# Use 1 on testnet if you need to demonstrate the cascade in a sitting.
+CHECK_IN_REMINDER_GAP_HOURS=168
+
 STELLAR_NETWORK=testnet
 STELLAR_RPC_URL=https://soroban-testnet.stellar.org
-STELLAR_SECRET_KEY=<your Freighter secret key, or leave blank for simulated mode>
-HEIRLOOM_CONTRACT_ID=<the deployed contract ID from step 5, or leave blank for simulated mode>
+HEIRLOOM_CONTRACT_ID=<C… from step 4>
+
+R2_ACCOUNT_ID=<Cloudflare account id>
+R2_ACCESS_KEY_ID=<R2 access key>
+R2_SECRET_ACCESS_KEY=<R2 secret>
+R2_BUCKET=heirloom-archive
+R2_ENDPOINT=
+
+RESEND_API_KEY=<re_… from step 6>
+EMAIL_FROM=Heirloome <onboarding@resend.dev>
 ```
 
-**If `STELLAR_SECRET_KEY` and `HEIRLOOM_CONTRACT_ID` are both blank**, the API
-runs in simulated mode (explained in step 5). For production, fill them both.
+There is **no** `STELLAR_SECRET_KEY`. If an old note mentions it, ignore it.
 
 ---
 
-## 8. Fill `heirloom-web/.env.local`
+## 9. Fill `heirloom-web/.env.local`
 
-Copy the example and edit it:
-
-```bash
-cd ~/heirlooms/heirloom-web
-cp .env.example .env.local
+```powershell
+cd heirloom-web
+copy .env.example .env.local
 ```
-
-Edit `.env.local`:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000/api
-
 NEXT_PUBLIC_STELLAR_NETWORK=testnet
 NEXT_PUBLIC_RPC_URL=https://soroban-testnet.stellar.org
-
-# DEMO DATA GATE — keep FALSE in production. When false, API errors fall back
-# to genuinely empty data (no fabricated "warm" data is ever shown). Reviewers
-# exploring the UX with no backend may set this to true.
 NEXT_PUBLIC_DEMO_MODE=false
 ```
 
-**Never commit `.env.local` to git.** It is already in `.gitignore`.
+`NEXT_PUBLIC_DEMO_MODE` **must be `false`**. When true, API errors are replaced
+with fabricated sample families. That is a reviewer convenience only — not a
+live product.
+
+Never commit `.env.local`.
 
 ---
 
-## 9. Notifications are console-log only (optional future work)
+## 10. Production host (Drips / public URL)
 
-`heirloom-api/src/notifications/notifications.service.ts` logs "emails" to the
-console with the calm product voice. A real provider (Resend, Postmark, AWS SES)
-swaps in behind the same method signatures without touching callers.
+If you are deploying, not just running locally:
 
-**You do NOT need Pinata, Resend, SendGrid, or Twilio to run Heirloom.** Any
-older doc mentioning them was aspirational and has been removed. When you are
-ready to send real emails/SMS, implement one provider and wire it into
-`NotificationsService` — the call sites already exist.
+- [ ] Render (or similar): Postgres → Redis → **heirloom-api** web service → **heirloom-web**
+- [ ] Set the same env vars on the API service (use the production `DATABASE_URL`,
+      `REDIS_URL`, `WEB_ORIGIN`, `EMAIL_FROM`)
+- [ ] Set `NEXT_PUBLIC_API_URL` on the web service to `https://<your-api>/api`
+- [ ] Set `WEB_ORIGIN` on the API to the web URL (comma-separate localhost if needed)
+- [ ] After deploy, update `EMAIL_FROM` / Resend domain so claim emails use the
+      live `/claim/<token>` origin (`WEB_ORIGIN` is how those links are built)
 
----
-
-## 10. Summary checklist
-
-- [ ] GitHub token rotated (step 0).
-- [ ] Node 20+, pnpm, Docker, Freighter installed (step 1).
-- [ ] Three repos cloned side-by-side (step 2).
-- [ ] Freighter funded on testnet (step 3).
-- [ ] Postgres + Redis running via Docker Compose (step 4).
-- [ ] Soroban `legacy` contract deployed, or deliberately running in simulated
-      mode (step 5).
-- [ ] `JWT_SECRET` and `ENCRYPTION_KEY` generated (step 6).
-- [ ] `heirloom-api/.env` filled (step 7).
-- [ ] `heirloom-web/.env.local` filled with `NEXT_PUBLIC_DEMO_MODE=false` (step 8).
-- [ ] Notifications understood as console-log placeholders (step 9).
+Contracts stay on Stellar testnet until you explicitly choose mainnet.
 
 ---
 
-## What's next
+## 11. Summary checklist
 
-Once these are done, hand off to `latter.md` — an AI can run it to install
-dependencies, migrate the database, build the contract (if Rust is present),
-verify types and lint, build both apps, and commit everything. You review and
-push when ready.
+- [ ] GitHub auth is not a leaked token (step 0)
+- [ ] Node 20+, pnpm, Docker, Freighter, Rust, Stellar CLI (step 1)
+- [ ] Owner + guardian + beneficiary Freighter accounts funded on testnet (step 2)
+- [ ] Postgres + Redis running (step 3)
+- [ ] `legacy` contract deployed; contract id copied (step 4)
+- [ ] R2 bucket + API token created (step 5)
+- [ ] Resend API key created (step 6)
+- [ ] `JWT_SECRET` and `ENCRYPTION_KEY` generated (step 7)
+- [ ] `heirloom-api/.env` complete — including `HEIRLOOM_CONTRACT_ID`, R2, Resend (step 8)
+- [ ] `heirloom-web/.env.local` with `NEXT_PUBLIC_DEMO_MODE=false` (step 9)
+- [ ] Production hosts filled in if you are going public (step 10)
 
+---
+
+## What’s next
+
+Tell an agent: **run latter.md**
+
+That script installs dependencies, migrates the database, type-checks, tests,
+builds, and reports whether the stack is actually live. It will **refuse to
+treat missing contract / R2 / Resend / demo-mode-on as “fine”.** You review
+and push.

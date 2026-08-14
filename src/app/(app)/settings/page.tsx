@@ -209,7 +209,7 @@ export default function SettingsPage() {
             </div>
             */}
             <Button
-              variant="stellar"
+              variant="primary"
               onClick={connectAccount}
               disabled={working}
               aria-busy={working}

@@ -9,17 +9,55 @@ import { Card } from '@/components/ui/Card';
 import { useCapsule } from '@/hooks';
 import { formatUsd } from '@/utils/format';
 import { stamp, unfold } from '@/lib/motion';
+import { endpoints } from '@/services/endpoints';
+import { connectFreighter, signTransaction } from '@/services/wallet';
+import { capsuleDocumentUrl, capsuleMessageMediaUrl } from '@/lib/api';
 
 /**
  * The Legacy Capsule — a beneficiary's guided, respectful reveal.
  * No blockchain jargon, no transaction hashes. Just warmth and clarity.
+ * Claiming still requires the beneficiary's own Freighter signature.
  */
 export default function ClaimCapsulePage() {
   const params = useParams<{ token: string }>();
-  const { data: capsule } = useCapsule(params.token ?? 'demo');
+  const token = params.token ?? '';
+  const { data: capsule, refetch } = useCapsule(token);
   const [opened, setOpened] = useState<string | null>(null);
+  const [working, setWorking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
 
   if (!capsule) return null;
+
+  const canRelease = capsule.status === 'VERIFIED';
+  const canClaim = capsule.status === 'RELEASED' && capsule.readyToClaim;
+
+  async function run(action: 'release' | 'claim') {
+    setError(null);
+    setWorking(true);
+    try {
+      const address = await connectFreighter();
+      const unsigned =
+        action === 'release'
+          ? await endpoints.claim.releaseBuild(token, address)
+          : await endpoints.claim.claimBuild(token, address);
+      const signedXdr = await signTransaction(unsigned.xdr, {
+        networkPassphrase: unsigned.networkPassphrase,
+        address,
+      });
+      await endpoints.claim.submit(token, { action, signedXdr });
+      setDone(true);
+      await refetch();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'We couldn’t complete that just now. Please try again in a moment.',
+      );
+    } finally {
+      setWorking(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-reading px-6 py-20 text-center">
@@ -70,7 +108,8 @@ export default function ClaimCapsulePage() {
               <div key={a.id} className="rounded-card bg-cotton p-5 text-left paper-edge">
                 <p className="font-display text-xl">{a.label}</p>
                 <p className="mono mt-1 text-sm text-ink-soft">
-                  {a.amount} {a.assetCode} · {formatUsd(a.usdValue)}
+                  {a.amount} {a.assetCode}
+                  {a.usdValue != null ? ` · ${formatUsd(a.usdValue)}` : ''}
                 </p>
               </div>
             ))}
@@ -83,10 +122,16 @@ export default function ClaimCapsulePage() {
                 key={d.id}
                 className="flex items-center justify-between rounded-card bg-cotton p-5 text-left paper-edge"
               >
-                <p className="font-display text-lg">{d.title}</p>
-                <span className="text-xs uppercase tracking-widest text-ink-faint">
-                  {d.category}
-                </span>
+                <div>
+                  <p className="font-display text-lg">{d.title}</p>
+                  <p className="text-xs uppercase tracking-widest text-ink-faint">{d.category}</p>
+                </div>
+                <a
+                  href={capsuleDocumentUrl(token, d.id)}
+                  className="text-sm font-medium text-moss-deep"
+                >
+                  Open
+                </a>
               </div>
             ))}
           </Reveal>
@@ -99,8 +144,13 @@ export default function ClaimCapsulePage() {
                 {m.body ? (
                   <p className="mt-2 text-sm leading-relaxed text-ink-soft">{m.body}</p>
                 ) : null}
-                {m.durationLabel ? (
-                  <p className="mt-1 text-xs text-ink-faint">{m.type} · {m.durationLabel}</p>
+                {m.hasMedia ? (
+                  <a
+                    href={capsuleMessageMediaUrl(token, m.id)}
+                    className="mt-2 inline-block text-sm font-medium text-moss-deep"
+                  >
+                    Open this {m.type.toLowerCase()}
+                  </a>
                 ) : null}
               </div>
             ))}
@@ -115,10 +165,28 @@ export default function ClaimCapsulePage() {
         transition={{ delay: 0.4 }}
         className="mt-14"
       >
-        <Button size="lg">
-          <Lock className="h-4 w-4" aria-hidden />
-          Open my legacy
-        </Button>
+        {done ? (
+          <p className="font-display text-xl">It reached you. Take your time with it.</p>
+        ) : canRelease ? (
+          <Button size="lg" onClick={() => run('release')} disabled={working}>
+            <Lock className="h-4 w-4" aria-hidden />
+            {working ? 'Preparing…' : 'Begin opening this gift'}
+          </Button>
+        ) : canClaim ? (
+          <Button size="lg" onClick={() => run('claim')} disabled={working}>
+            <Lock className="h-4 w-4" aria-hidden />
+            {working ? 'Waiting for your signature…' : 'Receive what was left for me'}
+          </Button>
+        ) : (
+          <p className="text-sm text-ink-soft">
+            When the time is right, everything left for you will be waiting here.
+          </p>
+        )}
+        {error ? (
+          <p role="alert" className="mt-4 text-sm text-error">
+            {error}
+          </p>
+        ) : null}
         <p className="mt-4 text-xs text-ink-faint">
           Everything here was lovingly prepared for you, exactly as intended.
         </p>

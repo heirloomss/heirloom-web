@@ -1,6 +1,6 @@
 # heirloom-web
 
-The user-facing experience of **Heirloom** — a digital legacy platform built
+The user-facing experience of **Heirloome** — a digital legacy platform built
 on Stellar. This is where people prepare, protect, and eventually pass on
 their digital assets, documents, and the words that matter most.
 
@@ -43,8 +43,9 @@ pnpm install
 pnpm dev        # http://localhost:3000
 ```
 
-The app talks to `heirloom-api`. To run everything locally, start the API
-(see its README) and set the API URL in `.env`:
+The app talks to `heirloom-api`. To run everything locally, start with
+[`user_task.md`](./user_task.md) (secrets, Freighter, contract, R2, Resend),
+then ask an agent to run [`latter.md`](./latter.md).
 
 ```powershell
 cp .env.example .env

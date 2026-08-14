@@ -135,8 +135,8 @@ export const LEGACY_JOURNEY = {
 
 export const FAQS = [
   {
-    question: 'What is Heirloom and how does it work?',
-    answer: 'Heirloom is a digital legacy platform that combines strong document encryption with Stellar smart contracts. You upload important documents, set fund allocation percentages, write letters, and pick 2-3 trusted guardians. If you miss your periodic check-ins and guardians confirm your status, your inheritance plan executes automatically.'
+    question: 'What is Heirloome and how does it work?',
+    answer: 'Heirloome is a digital legacy platform that combines strong document encryption with Stellar smart contracts. You upload important documents, set fund allocation percentages, write letters, and pick 2-3 trusted guardians. If you miss your periodic check-ins and guardians confirm your status, your inheritance plan executes automatically.'
   },
   {
     question: 'What happens if I accidentally miss a Life Check-In?',
@@ -144,7 +144,7 @@ export const FAQS = [
   },
   {
     question: 'Do my beneficiaries need crypto knowledge to receive assets?',
-    answer: 'No. Heirloom abstracts away all blockchain jargon. Beneficiaries receive clear, guided instructions with direct claim links that convert or deposit funds smoothly into standard fiat bank balances or simple digital wallets.'
+    answer: 'No. Heirloome abstracts away all blockchain jargon. Beneficiaries receive clear, guided instructions with direct claim links that convert or deposit funds smoothly into standard fiat bank balances or simple digital wallets.'
   },
   {
     question: 'Are my private documents and messages safe?',

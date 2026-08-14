@@ -91,23 +91,25 @@ export function LegacyProtectionPanel() {
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
           {status === 'DRAFT' && !registered ? (
-            <Button variant="stellar" onClick={runProtect} disabled={working} aria-busy={working}>
+            <Button variant="primary" onClick={runProtect} disabled={working} aria-busy={working}>
               <Sparkles className="h-4 w-4" aria-hidden />
               Protect my legacy
             </Button>
           ) : null}
 
           {status === 'DRAFT' && registered ? (
-            <Button variant="stellar" onClick={runDeposit} disabled={working} aria-busy={working}>
+            <Button variant="primary" onClick={runDeposit} disabled={working} aria-busy={working}>
               <Wallet className="h-4 w-4" aria-hidden />
               Fund my legacy
             </Button>
           ) : null}
 
-          {status === 'FUNDED' ? (
+          {status === 'FUNDED' || status === 'VERIFYING' ? (
             <span className="inline-flex items-center gap-2 text-sm text-moss-deep">
               <ShieldCheck className="h-4 w-4" aria-hidden />
-              Protected — waiting for your guardians to confirm.
+              {status === 'VERIFYING'
+                ? 'Guardians have been asked to confirm, gently.'
+                : 'Protected — waiting for your guardians to confirm.'}
             </span>
           ) : null}
 
@@ -138,9 +140,11 @@ function describe(status: LegacyPlanStatus, registered: boolean): string {
     case 'DRAFT':
       return registered
         ? 'Your legacy is registered on Stellar. Fund it to finish protecting it — you sign in your own wallet, and you can withdraw by cancelling at any time before it’s claimed.'
-        : 'When you’re ready, protect everything you’ve prepared on Stellar. You’ll sign in your own wallet — Heirloom never holds your keys.';
+        : 'When you’re ready, protect everything you’ve prepared on Stellar. You’ll sign in your own wallet — Heirloome never holds your keys.';
     case 'FUNDED':
       return 'Everything is protected on Stellar. Your guardians simply confirm when the time comes.';
+    case 'VERIFYING':
+      return 'Trusted guardians have been asked to confirm. Nothing has been released.';
     case 'VERIFIED':
       return 'Your guardians have confirmed. Your legacy is ready to be released to the people you love.';
     case 'RELEASED':
@@ -180,6 +184,8 @@ function friendly(status: LegacyPlanStatus): string {
   switch (status) {
     case 'FUNDED':
       return 'Protected';
+    case 'VERIFYING':
+      return 'Confirming';
     case 'VERIFIED':
       return 'Verifying complete';
     case 'RELEASED':

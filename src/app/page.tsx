@@ -28,7 +28,7 @@ export default function LandingPage() {
           <HeirloomLogo size={42} className="shadow-paper-2 rounded-xl" />
           <div className="flex flex-col">
             <span className="font-display text-2xl font-bold tracking-wide text-ink">
-              Heirloom
+              Heirloome
             </span>
             <span className="text-[10px] font-bold tracking-widest text-bronze uppercase">
               Digital Legacy Platform
@@ -72,7 +72,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="mx-auto max-w-2xl text-lg text-ink-soft md:text-xl leading-relaxed">
-            Heirloom securely stores your property deeds, tax records, and private letters, 
+            Heirloome securely stores your property deeds, tax records, and private letters, 
             and automatically releases funds to your beneficiaries via Stellar smart contracts when triggered.
           </p>
 
@@ -204,12 +204,12 @@ export default function LandingPage() {
       <section className="py-16 border-t border-ink/10">
         <div className="paper-diorama-frame p-8 md:p-12">
           <div className="max-w-2xl">
-            <Badge tone="moss">Who Uses Heirloom</Badge>
+            <Badge tone="moss">Who Uses Heirloome</Badge>
             <h2 className="font-display text-3xl md:text-4xl font-bold text-ink mt-3">
               Designed For Anyone Who Wants Certainty
             </h2>
             <p className="text-ink-soft text-base mt-2">
-              Whether managing family estates, tokenized savings, or personal memories, Heirloom ensures your loved ones are never left in the dark.
+              Whether managing family estates, tokenized savings, or personal memories, Heirloome ensures your loved ones are never left in the dark.
             </p>
           </div>
 
@@ -275,7 +275,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="mt-12 border-t border-ink/10 pt-8 text-center text-sm text-ink-faint">
-        <p>© 2026 Heirloom — Digital Legacy Platform</p>
+        <p>© 2026 Heirloome — Digital Legacy Platform</p>
         <p className="mt-1">{TAGLINES[1]}</p>
       </footer>
     </div>

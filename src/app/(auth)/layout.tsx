@@ -16,7 +16,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <Link href="/" className="relative z-10 mb-8 flex items-center gap-3.5">
         <HeirloomLogo size={44} className="shadow-paper-2 rounded-xl" />
         <div className="flex flex-col">
-          <span className="font-display text-2xl font-bold tracking-wide text-ink">Heirloom</span>
+          <span className="font-display text-2xl font-bold tracking-wide text-ink">Heirloome</span>
           <span className="text-[9px] font-bold tracking-widest text-bronze uppercase">Digital Legacy</span>
         </div>
       </Link>

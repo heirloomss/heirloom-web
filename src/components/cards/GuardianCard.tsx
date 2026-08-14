@@ -101,7 +101,7 @@ export function GuardianCard({ guardian }: { guardian: Guardian }) {
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <Button
-                variant="stellar"
+                variant="primary"
                 onClick={approve}
                 disabled={working}
                 aria-busy={working}

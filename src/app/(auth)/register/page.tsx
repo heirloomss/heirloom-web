@@ -129,7 +129,7 @@ export default function RegisterPage() {
 
       <div className="mt-8">
         <Button
-          variant="stellar"
+          variant="primary"
           size="lg"
           className="w-full font-semibold"
           onClick={handleFreighterStart}

@@ -1,8 +1,8 @@
 /**
  * Typed API client for heirloom-api.
  * Base URL from NEXT_PUBLIC_API_URL (default http://localhost:4000/api).
- * Handles JWT storage + attachment. Designed to fail softly so hooks can
- * fall back to elegant seeded demo data when the API is unavailable.
+ * Handles JWT storage + attachment. A 45s timeout covers Soroban prepare/submit
+ * without falling back to empty data on a slow RPC.
  */
 
 const BASE_URL =
@@ -70,7 +70,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   // Short timeout so demo fallbacks are snappy when the API is down.
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 4000);
+  const timeout = setTimeout(() => controller.abort(), 45_000);
 
   let res: Response;
   try {

@@ -60,7 +60,7 @@ export function ProtectAssetForm() {
               <span className="font-display text-[11px] font-semibold uppercase tracking-widest text-[#F0E4E7]">
                 Protected
               </span>
-              <span className="font-display text-lg italic text-cotton/90">Heirloom</span>
+              <span className="font-display text-lg italic text-cotton/90">Heirloome</span>
             </div>
           </motion.div>
         ) : null}

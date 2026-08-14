@@ -54,6 +54,7 @@ const demoCapsule: LegacyCapsule = {
       type: 'Letter',
       title: 'To my daughter, Sarah',
       body: 'My dearest Sarah,\n\nIf you are reading this, know that every ordinary morning with you was the great fortune of my life.\n\nBe gentle with yourself. I am so proud of you. I always was.\n\nAll my love,\nDad',
+      hasMedia: false,
     },
   ],
 };
@@ -317,7 +318,7 @@ export function useCapsule(token: string) {
   const fallback = pick(demoCapsule, emptyCapsule(token));
   return useQuery<LegacyCapsule>({
     queryKey: ['legacy', 'capsule', token],
-    queryFn: withFallback(() => endpoints.legacy.capsule(token), fallback),
+    queryFn: withFallback(() => endpoints.claim.capsule(token), fallback),
     placeholderData: fallback,
   });
 }

@@ -5,12 +5,11 @@ import { ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { stack } from '@/lib/motion';
 import { formatAsset, formatUsd } from '@/utils/format';
-import { beneficiaryName } from '@/lib/demo-data';
 import type { Asset } from '@/types';
 
 /** A protected asset — calm, sealed, and clearly destined for someone. */
 export function AssetCard({ asset }: { asset: Asset }) {
-  const recipient = beneficiaryName(asset.recipientId);
+  const recipient = asset.recipientName;
   return (
     <motion.li variants={stack} className="list-none">
       <article className="relative rounded-card bg-cotton p-6 paper-edge transition-shadow duration-500 hover:shadow-paper-2">

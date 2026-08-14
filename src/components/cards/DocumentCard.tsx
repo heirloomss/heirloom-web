@@ -5,10 +5,21 @@ import { FileText, Lock } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { stack } from '@/lib/motion';
 import { formatDate } from '@/utils/format';
+import { archiveDownloadUrl, fetchAuthedBlob } from '@/lib/api';
 import type { ArchiveDocument } from '@/types';
 
 /** A filed document in the Digital Archive. */
 export function DocumentCard({ document }: { document: ArchiveDocument }) {
+  async function download() {
+    const blob = await fetchAuthedBlob(archiveDownloadUrl(document.id));
+    const url = URL.createObjectURL(blob);
+    const a = window.document.createElement('a');
+    a.href = url;
+    a.download = document.title;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <motion.li variants={stack} className="list-none">
       <article className="rounded-card bg-cotton p-6 paper-edge transition-shadow duration-500 hover:shadow-paper-2">
@@ -30,6 +41,13 @@ export function DocumentCard({ document }: { document: ArchiveDocument }) {
         <p className="mt-4 text-xs text-ink-faint">
           {document.sizeLabel} · Filed {formatDate(document.createdAt)}
         </p>
+        <button
+          type="button"
+          onClick={() => void download()}
+          className="mt-3 text-sm font-medium text-moss-deep"
+        >
+          Download
+        </button>
       </article>
     </motion.li>
   );

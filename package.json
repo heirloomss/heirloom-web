@@ -2,7 +2,7 @@
   "name": "heirloom-web",
   "version": "1.0.0",
   "private": true,
-  "description": "Heirloom — a digital legacy platform. Preserve what matters. Protect those who matter.",
+  "description": "Heirloome — a digital legacy platform. Preserve what matters. Protect those who matter.",
   "license": "MIT",
   "scripts": {
     "dev": "next dev",

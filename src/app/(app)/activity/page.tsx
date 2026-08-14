@@ -55,7 +55,7 @@ export default function ActivityPage() {
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-ink-soft">
             Some things arrive right away; others wait for a graduation, a
-            wedding, a quiet birthday. You choose each moment — Heirloom keeps
+            wedding, a quiet birthday. You choose each moment — Heirloome keeps
             your timing perfectly.
           </p>
         </div>

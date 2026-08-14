@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/Input';
@@ -11,16 +12,22 @@ import { FormSubmit } from './FormSubmit';
 import { messageSchema, type MessageValues } from '@/lib/validation';
 import { MESSAGE_TYPES, RELEASE_RULES, type Message } from '@/types';
 import { useBeneficiaries } from '@/hooks';
-import { endpoints } from '@/services/endpoints';
+import { createMessage } from '@/lib/api';
+import { useQueryClient } from '@tanstack/react-query';
 
-/** Compose a letter, or schedule a voice/video/photo for someone you love. */
+/** Compose a letter, or attach a voice/video/photo for someone you love. */
 export function MessageForm({ initial }: { initial?: Partial<MessageValues> }) {
   const { onClose } = useDialog();
   const { data: beneficiaries = [] } = useBeneficiaries();
+  const queryClient = useQueryClient();
+  const [file, setFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<MessageValues>({
     resolver: zodResolver(messageSchema),
@@ -33,20 +40,31 @@ export function MessageForm({ initial }: { initial?: Partial<MessageValues> }) {
     },
   });
 
+  const kind = watch('type');
+  const needsFile = kind === 'Voice' || kind === 'Video' || kind === 'Photo';
+
   async function onSubmit(values: MessageValues) {
-    const payload: Partial<Message> = {
-      title: values.title,
-      type: values.type as Message['type'],
-      recipientId: values.recipientId || null,
-      releaseRule: values.releaseRule as Message['releaseRule'],
-      body: values.body || undefined,
-    };
-    try {
-      await endpoints.messages.create(payload);
-    } catch {
-      /* offline — demo data keeps the moment */
+    setError(null);
+    if (needsFile && !file) {
+      setError('Please attach the recording or photograph.');
+      return;
     }
-    onClose();
+    try {
+      await createMessage({
+        title: values.title,
+        type: values.type as Message['type'],
+        recipientId: values.recipientId || undefined,
+        releaseRule: values.releaseRule as Message['releaseRule'],
+        body: values.body || undefined,
+        file: file ?? undefined,
+      });
+      await queryClient.invalidateQueries({ queryKey: ['messages'] });
+      await queryClient.invalidateQueries({ queryKey: ['legacy', 'journey'] });
+      await queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'We couldn’t save that just now.');
+    }
   }
 
   return (
@@ -86,13 +104,43 @@ export function MessageForm({ initial }: { initial?: Partial<MessageValues> }) {
           </option>
         ))}
       </Select>
-      <Textarea
-        label="Your words"
-        rows={7}
-        placeholder="Take your time. There is no wrong way to say what matters."
-        error={errors.body?.message}
-        {...register('body')}
-      />
+      {kind === 'Letter' ? (
+        <Textarea
+          label="Your words"
+          rows={7}
+          placeholder="Take your time. There is no wrong way to say what matters."
+          error={errors.body?.message}
+          {...register('body')}
+        />
+      ) : (
+        <div>
+          <input
+            ref={fileRef}
+            type="file"
+            className="sr-only"
+            accept={kind === 'Photo' ? 'image/*' : kind === 'Voice' ? 'audio/*' : 'video/*'}
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            aria-label="Attach a recording or photograph"
+          />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="flex w-full flex-col items-center rounded-card border border-dashed border-ink/20 bg-ivory px-6 py-8 text-center transition-colors hover:border-moss/40"
+          >
+            <span className="text-sm font-medium text-ink">
+              {file ? file.name : `Attach a ${kind.toLowerCase()}`}
+            </span>
+            <span className="mt-1 text-xs text-ink-faint">
+              Encrypted the moment it arrives. Up to 50 MB.
+            </span>
+          </button>
+        </div>
+      )}
+      {error ? (
+        <p role="alert" className="text-sm text-error">
+          {error}
+        </p>
+      ) : null}
       <div className="flex justify-end gap-3 pt-2">
         <Button variant="ghost" onClick={onClose}>
           Keep for later

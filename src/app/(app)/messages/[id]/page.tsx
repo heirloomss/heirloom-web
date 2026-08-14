@@ -8,8 +8,9 @@ import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/Badge';
 import { letterLine } from '@/lib/motion';
 import { formatDate } from '@/utils/format';
-import { beneficiaryName } from '@/lib/demo-data';
 import { useMessage } from '@/hooks';
+import { fetchAuthedBlob, messageMediaUrl } from '@/lib/api';
+import { useEffect, useState } from 'react';
 import type { MessageType } from '@/types';
 
 const ICONS: Record<MessageType, LucideIcon> = {
@@ -27,7 +28,7 @@ export default function MessageDetailPage() {
   if (!message) return null;
 
   const Icon = ICONS[message.type];
-  const recipient = beneficiaryName(message.recipientId);
+  const recipient = message.recipientName;
   const isLetter = message.type === 'Letter' && Boolean(message.body);
   const lines = message.body ? message.body.split('\n').filter((l) => l.trim() !== '') : [];
 
@@ -84,6 +85,8 @@ export default function MessageDetailPage() {
             <div aria-hidden className="paper-divider my-8" />
             <p className="text-base italic text-ink-soft">Written with love, always.</p>
           </div>
+        ) : message.hasMedia ? (
+          <AuthedMedia id={message.id} type={message.type} />
         ) : (
           <div className="overflow-hidden rounded-image border-4 border-linen bg-linen/60 shadow-paper-1">
             <div className="relative aspect-video w-full">
@@ -107,4 +110,34 @@ export default function MessageDetailPage() {
       </article>
     </div>
   );
+}
+
+function AuthedMedia({ id, type }: { id: string; type: MessageType }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    fetchAuthedBlob(messageMediaUrl(id))
+      .then((blob) => {
+        objectUrl = URL.createObjectURL(blob);
+        setUrl(objectUrl);
+      })
+      .catch(() => setUrl(null));
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [id]);
+
+  if (!url) {
+    return <p className="text-sm text-ink-soft">Opening this memory…</p>;
+  }
+  if (type === 'Photo') {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={url} alt="" className="w-full rounded-image border-4 border-linen" />
+    );
+  }
+  if (type === 'Voice') {
+    return <audio src={url} controls className="w-full" />;
+  }
+  return <video src={url} controls className="w-full rounded-image border-4 border-linen" />;
 }

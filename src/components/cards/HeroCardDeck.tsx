@@ -234,7 +234,7 @@ export function HeroCardDeck() {
               </div>
 
               <div className="rounded-card bg-linen/60 p-3.5 text-xs text-ink-soft flex items-center justify-between border border-ink/10">
-                <span>Files are encrypted on your local browser. Heirloom servers cannot decrypt your documents.</span>
+                <span>Files are encrypted on your local browser. Heirloome servers cannot decrypt your documents.</span>
                 <span className="font-semibold text-indigo flex items-center gap-1.5"><Eye className="h-3.5 w-3.5" /> Client Encrypted</span>
               </div>
             </motion.div>
