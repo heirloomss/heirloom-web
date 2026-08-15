@@ -12,11 +12,8 @@ import {
   releaseRuleToApi,
 } from '@/lib/mappers';
 import type {
-  ActivityEvent,
-  ArchiveDocument,
   Asset,
   Beneficiary,
-  CheckInState,
   Guardian,
   GuardianSettings,
   JourneyEvent,
