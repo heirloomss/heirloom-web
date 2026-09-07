@@ -1,8 +1,9 @@
+# Approve post-install build scripts for the native deps pnpm 10+ blocks by
+# default. sharp powers Next.js image optimization; unrs-resolver is the native
+# module resolver used by eslint-import-resolver-typescript.
 allowBuilds:
-  sharp: set this to true or false
-  unrs-resolver: set this to true or false
-# Approve build scripts for the two dependencies pnpm flags for post-install builds.
-# sharp powers Next.js image optimization; unrs-resolver is a module resolver.
+  sharp: true
+  unrs-resolver: true
 onlyBuiltDependencies:
   - sharp
   - unrs-resolver

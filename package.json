@@ -4,6 +4,7 @@
   "private": true,
   "description": "Heirloome — a digital legacy platform. Preserve what matters. Protect those who matter.",
   "license": "MIT",
+  "packageManager": "pnpm@11.1.2",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
