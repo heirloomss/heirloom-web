@@ -10,7 +10,7 @@ shared picture.
 | Contract logic, state machine, on-chain auth, events | `heirloom-contracts` |
 | Endpoints, encryption, archive, messages, reminders, unsigned-XDR builder | `heirloom-api` |
 | Screens, flows, wallet integration, copy, design | `heirloom-web` |
-| These docs | `heirloom-docs` |
+| These docs | `heirloom-web` (`docs/`) |
 
 A change that spans repos (e.g. a new contract function plus the UI to call it)
 gets a coordinated issue in each, with an explicit **"Depends on"**

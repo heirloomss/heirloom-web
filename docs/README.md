@@ -56,7 +56,7 @@ works.
 | --- | --- |
 | [`heirloom-contracts`](https://github.com/heirloomss/heirloom-contracts) | The Soroban `legacy` contract (Rust). |
 | [`heirloom-api`](https://github.com/heirloomss/heirloom-api) | Off-chain service: accounts, archive, messages, reminders, unsigned-XDR builder (NestJS). |
-| [`heirloom-web`](https://github.com/heirloomss/heirloom-web) | The app people use (Next.js). |
+| [`heirloom-web`](https://github.com/heirloomss/heirloom-web) | The app people use (Next.js). These docs live in its `docs/` folder. |
 
 ## Status
 

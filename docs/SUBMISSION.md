@@ -40,7 +40,8 @@ Data flow: user → heirloom-web → heirloom-api → PostgreSQL/Redis, and
 heirloom-web → Soroban RPC directly for contract writes. Contract writes are
 always: API builds unsigned XDR → Freighter signs → app submits.
 
-(A fourth repo, **[heirloom-docs]**, holds this documentation.)
+This documentation set lives in `heirloom-web/docs/` and is published with
+GitBook (Git Sync on `heirloom-web`, root `./docs`).
 
 ## Planned issues (already created)
 
@@ -73,7 +74,7 @@ coordinated "Depends on" issues and shipped contract → API → web.
 | heirloom-contracts | https://github.com/heirloomss/heirloom-contracts |
 | heirloom-api | https://github.com/heirloomss/heirloom-api |
 | heirloom-web | https://github.com/heirloomss/heirloom-web |
-| heirloom-docs (site) | `[https://…gitbook.io]` |
+| Documentation site (GitBook, from heirloom-web/docs) | `[https://…gitbook.io]` |
 | Contract on explorer | https://stellar.expert/explorer/testnet/contract/CAA55GCID6DTTQNUFMNT2PNKSBIDMMMKEPP6GKUKL3WJ3SH6QRRSXUNE |
 | Deploy transaction | https://stellar.expert/explorer/testnet/tx/c1c58e40f734f618c99a9456c4f802be7344e27d7950842e74f90bf349af1844 |
 | Release tags | `v0.1.0` on each repo |
@@ -81,13 +82,13 @@ coordinated "Depends on" issues and shipped contract → API → web.
 
 ## Pre-submission checklist
 
-- [ ] All four repos **public**
+- [ ] All three repos **public**
 - [ ] Branch protection applied (`scripts-branch-protection.sh`)
 - [ ] CI green on `main` for all repos
 - [ ] App deployed; `NEXT_PUBLIC_DEMO_MODE=false`; health check 200 with Stellar,
       R2, and Resend all "connected"
 - [ ] R2 and Resend credentials filled in `heirloom-api/.env` / host env
-- [ ] GitBook space connected to `heirloom-docs` and published
+- [ ] GitBook space connected to `heirloom-web` (Git Sync, root `./docs`) and published
 - [ ] Demo video recorded and linked
 - [ ] Confirmed Heirloom is **not already** in the approved list
       (https://www.drips.network/wave/stellar/repos)
