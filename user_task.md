@@ -30,17 +30,11 @@ GitHub org: `heirloomss`
 
 ## 1. Install tools (once)
 
-- [ ] **Node.js 20+** — https://nodejs.org (LTS)
-- [ ] **pnpm** via Corepack: `corepack enable`
-- [ ] **Docker Desktop** — Postgres + Redis for local runs
-- [ ] **Freighter** browser extension — https://www.freighter.app
-- [ ] **Rust** + wasm target + **Stellar CLI** (required — the contract must be live):
-
-```powershell
-# Windows (PowerShell). Use rustup from https://rustup.rs
-rustup target add wasm32-unknown-unknown
-cargo install --locked stellar-cli
-```
+- [x] **Node.js 20+** — ✅ nvm default now `v20.20.2` (was v18.19.1; `/usr/bin/node` v18 still on PATH — use a login shell so nvm wins)
+- [x] **pnpm** via Corepack — ✅ pnpm `12.3.4` active
+- [ ] **Docker** — ❌ not installed. `sudo apt install -y docker.io docker-compose-v2 && sudo usermod -aG docker $USER` (then re-login)
+- [ ] **Freighter** browser extension — https://www.freighter.app — *install in your own Chrome*
+- [x] **Rust** + wasm target + **Stellar CLI** — ✅ rustc 1.97.1, `wasm32v1-none` target, stellar-cli 27.1.0 all present
 
 ---
 
@@ -89,8 +83,15 @@ cd heirloom-contracts
 NETWORK=testnet SOURCE=heirloom-deployer ./scripts/deploy.sh
 ```
 
-- [ ] Copy the printed contract id (`C…`).
-- [ ] You will paste it into `heirloom-api/.env` as `HEIRLOOM_CONTRACT_ID`.
+- [x] ✅ **DONE (testnet, 2026-09-07).**
+      Contract id: `CAA55GCID6DTTQNUFMNT2PNKSBIDMMMKEPP6GKUKL3WJ3SH6QRRSXUNE`
+      Deployer identity `heirloom-deployer` (`GC3LHAXATEX724O356S6ERSFO6B64HGGJWUCORSUFAPSFQVVRTI6UZUT`),
+      Friendbot-funded, key in `~/.config/stellar/identity/`.
+      Wasm hash `d52d35a5cb25c249dfcbdb8602435bdaee43bde07254f44198c2793ba4bfad80`.
+      Deploy tx: https://stellar.expert/explorer/testnet/tx/c1c58e40f734f618c99a9456c4f802be7344e27d7950842e74f90bf349af1844
+- [x] Written into `heirloom-api/.env` as `HEIRLOOM_CONTRACT_ID` (and `heirloom-contracts/.env`).
+- [x] Toolchain note: `rust-toolchain.toml` bumped `1.85.0 → 1.88.0` (transitive deps
+      `darling 0.23` / `serde_with 3.21` now need rustc ≥ 1.88).
 - [ ] The **API never holds a signing key**. Owners, guardians, and beneficiaries
       sign in Freighter. Do not put a Freighter secret into the API `.env`.
 
@@ -107,6 +108,9 @@ then stored in R2. Uploads return 503 until this is set.
 - [ ] Copy: Account ID, Access Key ID, Secret Access Key, bucket name
 - [ ] Endpoint is `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` (leave
       `R2_ENDPOINT` blank in `.env` to use that default)
+
+> **SKIPPED for now** — R2 activation requires a card on file. Come back to this;
+> uploads/downloads return 503 until `R2_*` is filled.
 
 ---
 
@@ -125,31 +129,29 @@ beneficiary’s private capsule link (`/claim/<token>`) go out through Resend.
 Without `RESEND_API_KEY`, emails are skipped and only logged. That is not
 Drips-ready — fill it in.
 
+> **SKIPPED for now** — revisit. Emails are logged-only until `RESEND_API_KEY` is set.
+
 ---
 
 ## 7. Generate secrets
 
-```powershell
-# JWT signing secret
-node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-
-# AES-256-GCM key (64 hex chars)
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-- [ ] Copy both. You will paste them into `heirloom-api/.env`.
-- [ ] Never commit `.env` files.
+- [x] ✅ **DONE.** `JWT_SECRET` (base64) and `ENCRYPTION_KEY` (64 hex) generated and
+      already written into `heirloom-api/.env`.
+- [x] `.env` is covered by `.gitignore` — never committed.
 
 ---
 
 ## 8. Fill `heirloom-api/.env`
 
-```powershell
-cd heirloom-api
-copy .env.example .env
-```
+- [x] `heirloom-api/.env` created from `.env.example`.
+- [x] Filled: `PORT`, `WEB_ORIGIN`, `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`,
+      `ENCRYPTION_KEY`, `REDIS_URL`, `CHECK_IN_REMINDER_GAP_HOURS`, `STELLAR_NETWORK`,
+      `STELLAR_RPC_URL`, `EMAIL_FROM`.
+- [ ] **Still blank — need real values:** `HEIRLOOM_CONTRACT_ID` (step 4),
+      `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` (step 5),
+      `RESEND_API_KEY` (step 6).
 
-Edit `.env` so **every** value is real:
+Reference — every value should end up real:
 
 ```env
 PORT=4000
@@ -188,23 +190,9 @@ There is **no** `STELLAR_SECRET_KEY`. If an old note mentions it, ignore it.
 
 ## 9. Fill `heirloom-web/.env.local`
 
-```powershell
-cd heirloom-web
-copy .env.example .env.local
-```
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:4000/api
-NEXT_PUBLIC_STELLAR_NETWORK=testnet
-NEXT_PUBLIC_RPC_URL=https://soroban-testnet.stellar.org
-NEXT_PUBLIC_DEMO_MODE=false
-```
-
-`NEXT_PUBLIC_DEMO_MODE` **must be `false`**. When true, API errors are replaced
-with fabricated sample families. That is a reviewer convenience only — not a
-live product.
-
-Never commit `.env.local`.
+- [x] ✅ **DONE.** `heirloom-web/.env.local` created with `NEXT_PUBLIC_API_URL`,
+      `NEXT_PUBLIC_STELLAR_NETWORK`, `NEXT_PUBLIC_RPC_URL`, and
+      `NEXT_PUBLIC_DEMO_MODE=false`. Covered by `.gitignore`.
 
 ---
 
@@ -227,15 +215,15 @@ Contracts stay on Stellar testnet until you explicitly choose mainnet.
 ## 11. Summary checklist
 
 - [ ] GitHub auth is not a leaked token (step 0)
-- [ ] Node 20+, pnpm, Docker, Freighter, Rust, Stellar CLI (step 1)
+- [ ] Node 20+, pnpm ✅ · Rust + Stellar CLI ✅ · **Docker ❌** · Freighter ❌ (step 1)
 - [ ] Owner + guardian + beneficiary Freighter accounts funded on testnet (step 2)
 - [ ] Postgres + Redis running (step 3)
-- [ ] `legacy` contract deployed; contract id copied (step 4)
+- [x] `legacy` contract deployed; contract id copied (step 4) ✅ `CAA55GCID6...XUNE`
 - [ ] R2 bucket + API token created (step 5)
 - [ ] Resend API key created (step 6)
-- [ ] `JWT_SECRET` and `ENCRYPTION_KEY` generated (step 7)
-- [ ] `heirloom-api/.env` complete — including `HEIRLOOM_CONTRACT_ID`, R2, Resend (step 8)
-- [ ] `heirloom-web/.env.local` with `NEXT_PUBLIC_DEMO_MODE=false` (step 9)
+- [x] `JWT_SECRET` and `ENCRYPTION_KEY` generated (step 7) ✅
+- [ ] `heirloom-api/.env` complete — base values ✅; still need `HEIRLOOM_CONTRACT_ID`, R2, Resend (step 8)
+- [x] `heirloom-web/.env.local` with `NEXT_PUBLIC_DEMO_MODE=false` (step 9) ✅
 - [ ] Production hosts filled in if you are going public (step 10)
 
 ---
