@@ -13,6 +13,7 @@
 </p>
 
 <p align="center">
+  <a href="docs/">Documentation</a> ·
   <a href="https://github.com/heirloomss/heirloom-api">API repo</a> ·
   <a href="https://github.com/heirloomss/heirloom-contracts">Contracts repo</a> ·
   <a href="#design-language">Design language</a> ·
@@ -55,6 +56,7 @@ Soroban `legacy` contract) run underneath a plain-English surface.
 - [Design language](#design-language)
 - [Project structure](#project-structure)
 - [Deployment (Vercel)](#deployment-vercel)
+- [Documentation](#documentation)
 - [Contributing](#contributing)
 - [Security](#security)
 - [Contributors](#contributors)
@@ -91,9 +93,8 @@ cp .env.example .env.local        # NEXT_PUBLIC_DEMO_MODE=false
 pnpm dev                          # http://localhost:3000
 ```
 
-The app talks to `heirloom-api`. To run the whole stack locally, work through
-[`user_task.md`](./user_task.md) (secrets, Freighter, contract, R2, Resend),
-then have an agent run [`latter.md`](./latter.md).
+The app talks to `heirloom-api`. To bring up the whole stack locally, follow
+[docs/developers/local-setup.md](docs/developers/local-setup.md).
 
 Set `NEXT_PUBLIC_DEMO_MODE=true` to explore every screen with no backend — this
 renders fabricated sample families and is a reviewer convenience only.
@@ -154,6 +155,19 @@ src/
 Topology: user → **heirloom-web** (Vercel) → **heirloom-api** (Render) →
 PostgreSQL/Redis, and heirloom-web → Soroban RPC directly for Freighter-signed
 contract writes.
+
+## Documentation
+
+The full project documentation lives in [`docs/`](docs/) and is published with
+GitBook (Git Sync on this repo, root `./docs` — see [`.gitbook.yaml`](.gitbook.yaml)).
+
+| Section | |
+| --- | --- |
+| Overview | [The problem](docs/overview/problem.md) · [How it works](docs/overview/how-it-works.md) · [Architecture](docs/overview/architecture.md) |
+| Protocol | [Lifecycle](docs/protocol/lifecycle.md) · [Economic model](docs/protocol/economics.md) · [Security model](docs/protocol/security-model.md) |
+| Contract | [`legacy` reference](docs/contracts/legacy-reference.md) · [Events](docs/contracts/events.md) · [Errors](docs/contracts/errors.md) |
+| Guides | [Owner](docs/guides/owner.md) · [Guardian](docs/guides/guardian.md) · [Beneficiary](docs/guides/beneficiary.md) |
+| Developers | [Local setup](docs/developers/local-setup.md) · [Environment](docs/developers/environment.md) · [REST API](docs/developers/api-reference.md) · [SDK & RPC](docs/developers/sdk-and-rpc.md) · [Deployment](docs/developers/deployment.md) |
 
 ## Contributing
 
