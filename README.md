@@ -6,6 +6,10 @@
 </p>
 
 <p align="center">
+  <strong>🌐 Live app: <a href="https://heirloome.vercel.app">heirloome.vercel.app</a></strong>
+</p>
+
+<p align="center">
   <a href="https://github.com/heirloomss/heirloom-web/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/heirloomss/heirloom-web/actions/workflows/ci.yml/badge.svg" /></a>
   <img alt="Next.js" src="https://img.shields.io/badge/Next.js-15-black.svg" />
   <img alt="Node" src="https://img.shields.io/badge/node-22-339933.svg" />
@@ -13,6 +17,7 @@
 </p>
 
 <p align="center">
+  <a href="https://heirloome.vercel.app">Live app</a> ·
   <a href="docs/">Documentation</a> ·
   <a href="https://github.com/heirloomss/heirloom-api">API repo</a> ·
   <a href="https://github.com/heirloomss/heirloom-contracts">Contracts repo</a> ·
@@ -144,6 +149,8 @@ src/
 ```
 
 ## Deployment (Vercel)
+
+Live at **[heirloome.vercel.app](https://heirloome.vercel.app)**.
 
 1. Import the repo into Vercel (framework preset: Next.js).
 2. Set `NEXT_PUBLIC_API_URL` to the deployed `heirloom-api` URL (with `/api`),

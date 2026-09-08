@@ -70,7 +70,7 @@ coordinated "Depends on" issues and shipped contract → API → web.
 
 | Item | URL |
 | --- | --- |
-| Live app | `[https://…vercel.app]` |
+| Live app | https://heirloome.vercel.app |
 | heirloom-contracts | https://github.com/heirloomss/heirloom-contracts |
 | heirloom-api | https://github.com/heirloomss/heirloom-api |
 | heirloom-web | https://github.com/heirloomss/heirloom-web |

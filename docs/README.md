@@ -1,5 +1,9 @@
 # Introduction
 
+{% hint style="info" %}
+**🌐 Live app: [heirloome.vercel.app](https://heirloome.vercel.app)**
+{% endhint %}
+
 Heirloom is a digital legacy platform on Stellar. It lets a person set aside
 assets, documents, and personal messages now, and have them reach the right
 people later — without a company in the middle deciding when "later" is.
@@ -64,6 +68,7 @@ Unaudited. Deployed on Stellar **testnet** only.
 
 | | |
 | --- | --- |
+| Live app | [heirloome.vercel.app](https://heirloome.vercel.app) |
 | Contract ID | `CAA55GCID6DTTQNUFMNT2PNKSBIDMMMKEPP6GKUKL3WJ3SH6QRRSXUNE` |
 | Wasm hash | `d52d35a5cb25c249dfcbdb8602435bdaee43bde07254f44198c2793ba4bfad80` |
 | Explorer | [stellar.expert](https://stellar.expert/explorer/testnet/contract/CAA55GCID6DTTQNUFMNT2PNKSBIDMMMKEPP6GKUKL3WJ3SH6QRRSXUNE) |
